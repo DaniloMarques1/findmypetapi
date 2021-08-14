@@ -1,0 +1,47 @@
+openapi: 3.0.1
+info:
+  title: Find my Pet
+  description: >
+    This is the documentation that describes the api
+    for the find my pet web application.
+  version: 1.0.0
+tags:
+  - name: User
+    description: Endpoints for sign up and sign in users.
+
+paths:
+  /user:
+    post:
+      tags:
+        - User
+      summary: Adds a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Created
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          maxLength: 60
+        password:
+          type: string
+          maxLength: 20
+        confirm_password:
+          type: string
+          maxLength: 20
+      required:
+        - name
+        - email
