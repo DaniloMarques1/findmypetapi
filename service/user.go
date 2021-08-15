@@ -1,8 +1,11 @@
 package service
 
 import (
+	"net/http"
+
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/model"
+	"github.com/danilomarques1/findmypetapi/util"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,11 +22,11 @@ func NewUserService(userRepo model.UserRepository) *UserService {
 
 func (us *UserService) Save(userDto dto.CreateUserRequestDto) (*dto.CreateUserResponseDto, error) {
 	if userDto.Password != userDto.ConfirmPassword {
-		// TODO error handling
+		return nil, util.NewApiError("Password and confirm password does not match", http.StatusBadRequest)
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userDto.Password), bcrypt.MinCost)
 	if err != nil {
-		// TODO
+		return nil, err
 	}
 	id := uuid.NewString()
 	user := model.User{
@@ -33,8 +36,10 @@ func (us *UserService) Save(userDto dto.CreateUserRequestDto) (*dto.CreateUserRe
 		PasswordHash: string(passwordHash),
 	}
 
+	// TODO check if there is a email already registered
+
 	if err := us.userRepo.Save(&user); err != nil {
-		// TODO
+		return nil, err
 	}
 
 	return &dto.CreateUserResponseDto{

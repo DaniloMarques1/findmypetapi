@@ -9,6 +9,7 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
+	cleanTables()
 	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
 	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
 	assertNil(t, err)
@@ -22,6 +23,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestErrorCreateUser(t *testing.T) {
+	cleanTables()
 	// missing name
 	body := `{"email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
 	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
@@ -31,6 +33,13 @@ func TestErrorCreateUser(t *testing.T) {
 
 	// different passwords
 	body = `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456890"}`
+	request, err = http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusBadRequest, response.Code)
+
+	// large password field
+	body = `{"name": "Fitz", "email": "fitz@gmail.com", "password": "39131dkjsakdj12391eqjdhjasdhuh38u29ehdhadhajfhh", "confirm_password": "39131dkjsakdj12391eqjdhjasdhuh38u29ehdhadhajfhh"}`
 	request, err = http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)

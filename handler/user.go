@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/danilomarques1/findmypetapi/dto"
-	"github.com/danilomarques1/findmypetapi/util"
 	"github.com/danilomarques1/findmypetapi/service"
+	"github.com/danilomarques1/findmypetapi/util"
 	validator "github.com/go-playground/validator/v10"
 )
 
@@ -25,16 +26,22 @@ func NewUserHandler(userService *service.UserService, validator *validator.Valid
 func (uh *UserHandler) Save(w http.ResponseWriter, r *http.Request) {
 	var userDto dto.CreateUserRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&userDto); err != nil {
-		// TODO error handling
+		log.Printf("Error decoding body %v\n", err)
+		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{Message: "Invalid body"})
+		return
 	}
 
 	if err := uh.validator.Struct(userDto); err != nil {
-		// TODO error handling
+		log.Printf("Error validating struct %v\n", err)
+		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{Message: "Invalid body"})
+		return
 	}
 
 	response, err := uh.userService.Save(userDto)
 	if err != nil {
-		// TODO error handling
+		log.Printf("Error saving user %v\n", err)
+		util.HandleError(w, err)
+		return
 	}
 
 	util.RespondJson(w, http.StatusCreated, response)
