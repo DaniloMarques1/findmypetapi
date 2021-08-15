@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/danilomarques1/findmypetapi/dto"
@@ -36,7 +37,14 @@ func (us *UserService) Save(userDto dto.CreateUserRequestDto) (*dto.CreateUserRe
 		PasswordHash: string(passwordHash),
 	}
 
-	// TODO check if there is a email already registered
+	userAr, err := us.userRepo.FindByEmail(userDto.Email);
+	if  err == nil {
+		if userAr != nil && userAr.Email == userDto.Email {
+			log.Printf("Email already registered %v\n", err)
+			return nil, util.NewApiError("Email already taken", http.StatusBadRequest)
+		}
+	}
+
 
 	if err := us.userRepo.Save(&user); err != nil {
 		return nil, err

@@ -30,7 +30,19 @@ func (ur *UserRepositorySql) Save(user *model.User) error {
 }
 
 func (ur *UserRepositorySql) FindByEmail(email string) (*model.User, error) {
-	return nil, nil
+	stmt, err := ur.db.Prepare("select * from userpet where email = $1")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var user model.User
+	err = stmt.QueryRow(email).Scan(&user.Id, &user.Name, &user.Email, &user.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (ur *UserRepositorySql) FindById(id string) (*model.User, error) {
