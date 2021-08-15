@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/danilomarques1/findmypetapi/handler"
+	"github.com/danilomarques1/findmypetapi/repository"
+	"github.com/danilomarques1/findmypetapi/service"
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -34,6 +37,13 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	if _, err := app.DB.Exec(string(sqlFile)); err != nil {
 		log.Fatalf("Error creating tables %v\n", err)
 	}
+
+	// adding handlers
+	userRepo := repository.NewUserRepositorySql(app.DB)
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService, app.validator)
+
+	app.Router.HandleFunc("/user", userHandler.Save).Methods(http.MethodPost)
 }
 
 func (app *App) Listen() {
