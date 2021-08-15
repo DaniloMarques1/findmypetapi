@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/dto"
+	"github.com/danilomarques1/findmypetapi/util"
+	"github.com/danilomarques1/findmypetapi/service"
 	validator "github.com/go-playground/validator/v10"
 )
 
@@ -31,11 +32,10 @@ func (uh *UserHandler) Save(w http.ResponseWriter, r *http.Request) {
 		// TODO error handling
 	}
 
-	_, err := uh.userService.Save(userDto) // TODO get and return response
+	response, err := uh.userService.Save(userDto)
 	if err != nil {
 		// TODO error handling
 	}
 
-	// TODO return 201 and response
-
+	util.RespondJson(w, http.StatusCreated, response)
 }
