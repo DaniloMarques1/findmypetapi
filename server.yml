@@ -24,9 +24,32 @@ paths:
       responses:
         '201':
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          description: Invalid Body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          maxLength: 60
+        password_hash:
+          type: string
     CreateUserRequest:
       type: object
       properties:
@@ -36,12 +59,26 @@ components:
         email:
           type: string
           maxLength: 60
+          description: Valid email address. Duplicated will not be allowed.
         password:
           type: string
           maxLength: 20
         confirm_password:
           type: string
           maxLength: 20
+          description: Should be equal to the password
       required:
         - name
         - email
+    CreateUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
