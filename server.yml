@@ -34,6 +34,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /session:
+    post:
+      tags:
+        - User
+      summary: Sign in a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionRequestDto'
+      responses:
+        '200':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponseDto'
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 
 components:
   schemas:
@@ -73,6 +97,25 @@ components:
     CreateUserResponse:
       type: object
       properties:
+        user:
+          $ref: '#/components/schemas/User'
+    SessionRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          maxLength: 60
+        password:
+          type: string
+          maxLength: 20
+      required:
+        - email
+        - password
+    SessionResponseDto:
+      type: object
+      properties:
+        token:
+          type: string
         user:
           $ref: '#/components/schemas/User'
     Error:
