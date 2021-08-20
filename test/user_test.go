@@ -61,3 +61,21 @@ func TestCreateUserDuplicate(t *testing.T) {
 	response = executeRequest(request)
 	assertEqual(t, http.StatusBadRequest, response.Code)
 }
+
+/*
+func TestCreateSession(t *testing.T) {
+	cleanTables()
+
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusCreated, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password": "123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+}
+*/
