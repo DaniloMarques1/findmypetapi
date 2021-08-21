@@ -61,7 +61,8 @@ func generateToken(userClaims UserClaims) (string, error) {
 
 func VerifyToken(tokenString string) (*UserClaims, error) {
 	var userClaims UserClaims
-	_, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (
+		interface{}, error) {
 		return []byte(os.Getenv("JWT_KEY")), nil
 	})
 	if err != nil {

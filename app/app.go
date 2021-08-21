@@ -43,8 +43,12 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService, app.validator)
 
-	app.Router.HandleFunc("/user", userHandler.Save).Methods(http.MethodPost)
-	app.Router.HandleFunc("/session", userHandler.CreateSession).Methods(http.MethodPost)
+	app.Router.HandleFunc("/user",
+		userHandler.Save).Methods(http.MethodPost)
+	app.Router.HandleFunc("/session",
+		userHandler.CreateSession).Methods(http.MethodPost)
+	app.Router.HandleFunc("/session/refresh",
+		userHandler.RefreshSession).Methods(http.MethodPut)
 }
 
 func (app *App) Listen() {

@@ -3,8 +3,8 @@ package test
 import (
 	"fmt"
 	"log"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -48,7 +48,7 @@ func assertEqual(t *testing.T, expect, actual interface{}) {
 	}
 }
 
-func assertNotEqual(t *testing.T, v1, v2 interface {}) {
+func assertNotEqual(t *testing.T, v1, v2 interface{}) {
 	if v1 == v2 {
 		t.Fatalf("\nThe values should not be equal\n%v\n%v", v1, v2)
 	}

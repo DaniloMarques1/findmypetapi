@@ -76,6 +76,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionResponseDto'
+        '401':
+          description: The given token was invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 
 components:

@@ -2,10 +2,10 @@ package test
 
 import (
 	"encoding/json"
+	"github.com/danilomarques1/findmypetapi/dto"
 	"net/http"
 	"strings"
 	"testing"
-	"github.com/danilomarques1/findmypetapi/dto"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -100,4 +100,30 @@ func TestCreateSessionError(t *testing.T) {
 	assertNil(t, err)
 	response = executeRequest(request)
 	assertEqual(t, http.StatusBadRequest, response.Code)
+}
+
+func TestRefreshSession(t *testing.T) {
+	cleanTables()
+
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusCreated, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password":"123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+
+	var responseDto dto.SessionResponseDto
+	err = json.NewDecoder(response.Body).Decode(&responseDto)
+	assertNil(t, err)
+
+	request, err = http.NewRequest(http.MethodPut, "/session/refresh", nil)
+	assertNil(t, err)
+	request.Header.Add("refresh_token", responseDto.RefreshToken)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
 }

@@ -67,3 +67,14 @@ func (uh *UserHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusOK, response)
 }
+
+func (uh *UserHandler) RefreshSession(w http.ResponseWriter, r *http.Request) {
+	refreshToken := r.Header.Get("refresh_token")
+	response, err := uh.userService.RefreshSession(refreshToken)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}
