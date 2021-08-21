@@ -33,5 +33,9 @@ func TestVerifyToken(t *testing.T) {
 
 	userClaims, err := util.VerifyToken(token)
 	assertNil(t, err)
-	log.Printf("User claims = %v\n", userClaims.UserId)
+	assertEqual(t, util.TOKEN, userClaims.TokenRole)
+
+	userClaims, err = util.VerifyToken(refreshToken)
+	assertNil(t, err)
+	assertEqual(t, util.REFRESH_TOKEN, userClaims.TokenRole)
 }

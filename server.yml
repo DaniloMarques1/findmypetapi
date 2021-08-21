@@ -57,6 +57,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /session/refresh:
+    put:
+      tags:
+        - User
+      summary: Refresh the token
+      parameters:
+        - name: refresh_token
+          in: header
+          required: true
+          description: The refresh token that was returned when session was created
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponseDto'
 
 
 components:
