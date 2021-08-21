@@ -46,3 +46,24 @@ func (uh *UserHandler) Save(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusCreated, response)
 }
+
+func (uh *UserHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
+	var sessionRequest dto.SessionRequestDto
+	if err := json.NewDecoder(r.Body).Decode(&sessionRequest); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{"Invalid body"})
+		return
+	}
+
+	if err := uh.validator.Struct(sessionRequest); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{"Invalid body"})
+		return
+	}
+
+	response, err := uh.userService.CreateSession(sessionRequest)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}

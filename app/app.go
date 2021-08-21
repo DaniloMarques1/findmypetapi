@@ -44,6 +44,7 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	userHandler := handler.NewUserHandler(userService, app.validator)
 
 	app.Router.HandleFunc("/user", userHandler.Save).Methods(http.MethodPost)
+	app.Router.HandleFunc("/session", userHandler.CreateSession).Methods(http.MethodPost)
 }
 
 func (app *App) Listen() {
