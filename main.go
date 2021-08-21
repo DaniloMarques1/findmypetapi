@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading env variables %v\n", err)
+		log.Printf("Error loading env variables %v\n", err)
 	}
 	dbstring := fmt.Sprintf("host=%v dbname=%v password=%v user=%v sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PWD"), os.Getenv("DB_USER"))

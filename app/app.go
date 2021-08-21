@@ -48,7 +48,7 @@ func (app *App) Init(sqlFileName, dbstring string) {
 }
 
 func (app *App) Listen() {
-	port := os.Getenv("SERVER_PORT")
+	port := os.Getenv("PORT")
 	server := http.Server{
 		Handler: app.Router,
 		Addr:    ":" + port,

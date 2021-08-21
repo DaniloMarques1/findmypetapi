@@ -1,1 +1,1 @@
-web: go build main.go; ./main
+web: findmypetapi
