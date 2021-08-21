@@ -95,6 +95,7 @@ func TestCreateSessionError(t *testing.T) {
 	response := executeRequest(request)
 	assertEqual(t, http.StatusCreated, response.Code)
 
+	// not sending required field email
 	body = `{password": "123456"}`
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
@@ -126,4 +127,44 @@ func TestRefreshSession(t *testing.T) {
 	request.Header.Add("refresh_token", responseDto.RefreshToken)
 	response = executeRequest(request)
 	assertEqual(t, http.StatusOK, response.Code)
+}
+
+func TestRefreshSessionError(t *testing.T) {
+	cleanTables()
+
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusCreated, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password":"123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+
+	var responseDto dto.SessionResponseDto
+	err = json.NewDecoder(response.Body).Decode(&responseDto)
+	assertNil(t, err)
+
+	// using token instead of refresh token
+	request, err = http.NewRequest(http.MethodPut, "/session/refresh", nil)
+	assertNil(t, err)
+	request.Header.Add("refresh_token", responseDto.Token)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusUnauthorized, response.Code)
+
+	// sending empty string
+	request, err = http.NewRequest(http.MethodPut, "/session/refresh", nil)
+	assertNil(t, err)
+	request.Header.Add("refresh_token", "")
+	response = executeRequest(request)
+	assertEqual(t, http.StatusUnauthorized, response.Code)
+
+	// not sending header at all
+	request, err = http.NewRequest(http.MethodPut, "/session/refresh", nil)
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusUnauthorized, response.Code)
 }
