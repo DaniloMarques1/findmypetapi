@@ -34,6 +34,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - User
+      summary: Update a user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '204':
+          description: Update successfully
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /session:
     post:
       tags:
@@ -124,6 +151,26 @@ components:
       properties:
         user:
           $ref: '#/components/schemas/User'
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        old_password:
+          type: string
+          maxLength: 20
+        new_password:
+          type: string
+          maxLength: 20
+        confirm_password:
+          type: string
+          maxLength: 20
+      required:
+        - name
+        - old_password
+        - new_password
+        - confirm_password
     SessionRequestDto:
       type: object
       properties:
@@ -152,3 +199,9 @@ components:
           type: string
       required:
         - message
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
