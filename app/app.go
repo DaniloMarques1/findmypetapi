@@ -9,6 +9,7 @@ import (
 	"github.com/danilomarques1/findmypetapi/handler"
 	"github.com/danilomarques1/findmypetapi/repository"
 	"github.com/danilomarques1/findmypetapi/service"
+	"github.com/danilomarques1/findmypetapi/util"
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -49,6 +50,8 @@ func (app *App) Init(sqlFileName, dbstring string) {
 		userHandler.CreateSession).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session/refresh",
 		userHandler.RefreshSession).Methods(http.MethodPut)
+	app.Router.Handle("/user",
+		util.AuthorizationMiddleware(http.HandlerFunc(userHandler.UpdateUser))).Methods(http.MethodPut)
 }
 
 func (app *App) Listen() {

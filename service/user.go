@@ -60,7 +60,8 @@ func (us *UserService) CreateSession(sessionRequest dto.SessionRequestDto) (
 	if err != nil {
 		return nil, util.NewApiError("Invalid email", http.StatusBadRequest)
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(sessionRequest.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash),
+		[]byte(sessionRequest.Password)); err != nil {
 		return nil, util.NewApiError("Invalid password", http.StatusBadRequest)
 	}
 
@@ -104,4 +105,30 @@ func (us *UserService) RefreshSession(refreshToken string) (*dto.SessionResponse
 	}
 
 	return &response, nil
+}
+
+func (us *UserService) UpdateUser(userId string, updateDto dto.UpdateUserDto) error {
+	user, err := us.userRepo.FindById(userId)
+	if err != nil {
+		return err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(updateDto.OldPassword)); err != nil {
+		return util.NewApiError("Wrong old password", http.StatusBadRequest)
+	}
+
+	if updateDto.NewPassword != updateDto.ConfirmPassword {
+		return util.NewApiError("New password and confirm password does not match", http.StatusBadRequest)
+	}
+
+	user.Name = updateDto.Name
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(updateDto.NewPassword), bcrypt.MinCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(passwordHash)
+
+	err = us.userRepo.Update(user)
+
+	return nil
 }

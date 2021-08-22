@@ -62,5 +62,16 @@ func (ur *UserRepositorySql) FindById(id string) (*model.User, error) {
 }
 
 func (ur *UserRepositorySql) Update(user *model.User) error {
+	stmt, err := ur.db.Prepare("update userpet set name = $1, password_hash = $2 where id = $3")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.Name, user.PasswordHash, user.Id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

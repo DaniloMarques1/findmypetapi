@@ -14,3 +14,10 @@ type CreateUserRequestDto struct {
 type CreateUserResponseDto struct {
 	User model.User `json:"user"`
 }
+
+type UpdateUserDto struct {
+	Name            string `json:"name" validate:"required,max=100"`
+	OldPassword     string `json:"old_password" validate:"required,max=20"`
+	NewPassword     string `json:"new_password" validate:"required,max=20"`
+	ConfirmPassword string `json:"confirm_password" validate:"required,max=20"`
+}
