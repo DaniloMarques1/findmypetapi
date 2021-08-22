@@ -1,7 +1,9 @@
 package util
 
 import (
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -70,4 +72,25 @@ func VerifyToken(tokenString string) (*UserClaims, error) {
 	}
 
 	return &userClaims, nil
+}
+
+func AuthorizationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bearer := r.Header.Get("Authorization")
+		slice := strings.Split(bearer, " ")
+		if len(slice) < 2 {
+			HandleError(w, NewApiError("Invalid token", http.StatusUnauthorized))
+			return
+		} else {
+			token := slice[1]
+			userClaims, err := VerifyToken(token)
+			if err != nil {
+				HandleError(w, NewApiError("Invalid token", http.StatusUnauthorized))
+				return
+			}
+
+			r.Header.Add("user_id", userClaims.UserId)
+			next.ServeHTTP(w, r)
+		}
+	})
 }
