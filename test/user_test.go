@@ -84,6 +84,7 @@ func TestCreateSession(t *testing.T) {
 	assertNotNil(t, sessionResponse.User)
 	assertNotEqual(t, "", sessionResponse.Token)
 	assertNotEqual(t, "", sessionResponse.RefreshToken)
+	assertNotEqual(t, "", sessionResponse.User.Name)
 }
 
 func TestCreateSessionError(t *testing.T) {
@@ -167,4 +168,38 @@ func TestRefreshSessionError(t *testing.T) {
 	assertNil(t, err)
 	response = executeRequest(request)
 	assertEqual(t, http.StatusUnauthorized, response.Code)
+}
+
+func TestUpdateUser(t *testing.T) {
+	cleanTables()
+
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusCreated, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password":"123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+	var sessionResponse dto.SessionResponseDto
+	err = json.NewDecoder(response.Body).Decode(&sessionResponse)
+	assertNil(t, err)
+
+	body = `{"name": "Fitz New", "old_password": "123456", "new_password": "newpassword",
+		"confirm_password": "newpassword"}`
+	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
+	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	assertNil(t, err)
+
+	response = executeRequest(request)
+	assertEqual(t, http.StatusNoContent, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password":"newpassword"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
 }
