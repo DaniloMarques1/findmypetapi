@@ -203,3 +203,48 @@ func TestUpdateUser(t *testing.T) {
 	response = executeRequest(request)
 	assertEqual(t, http.StatusOK, response.Code)
 }
+
+func TestUpdateUserError(t *testing.T) {
+	cleanTables()
+
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusCreated, response.Code)
+
+	body = `{"email": "fitz@gmail.com", "password":"123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+	var sessionResponse dto.SessionResponseDto
+	err = json.NewDecoder(response.Body).Decode(&sessionResponse)
+	assertNil(t, err)
+
+	// wrong old password, 400
+	body = `{"name": "Fitz", "old_password": "wrongpassword", 
+		"new_password": "validnewpassword", "confirm_password": "validnewpassword"}`
+	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
+	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusBadRequest, response.Code)
+
+	// missing required field, 400
+	body = `{"old_password": "wrongpassword", 
+		"new_password": "validnewpassword", "confirm_password": "validnewpassword"}`
+	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
+	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusBadRequest, response.Code)
+
+	// missing token, 401
+	body = `{ "name": "Fitz", "old_password": "wrongpassword", 
+		"new_password": "validnewpassword", "confirm_password": "validnewpassword"}`
+	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
+	assertNil(t, err)
+	response = executeRequest(request)
+	assertEqual(t, http.StatusUnauthorized, response.Code)
+}
