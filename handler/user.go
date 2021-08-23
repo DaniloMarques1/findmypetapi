@@ -82,7 +82,7 @@ func (uh *UserHandler) RefreshSession(w http.ResponseWriter, r *http.Request) {
 func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userId := r.Header.Get("user_id")
 	log.Printf("%v\n", userId)
-	var updateDto dto.UpdateUserDto
+	var updateDto dto.UpdateUserRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&updateDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return

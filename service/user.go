@@ -107,7 +107,7 @@ func (us *UserService) RefreshSession(refreshToken string) (*dto.SessionResponse
 	return &response, nil
 }
 
-func (us *UserService) UpdateUser(userId string, updateDto dto.UpdateUserDto) error {
+func (us *UserService) UpdateUser(userId string, updateDto dto.UpdateUserRequestDto) error {
 	user, err := us.userRepo.FindById(userId)
 	if err != nil {
 		return err
