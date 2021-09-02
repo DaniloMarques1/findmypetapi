@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Post(
     title VARCHAR(120) NOT NULL, 
     description TEXT,
     image_url VARCHAR(100),
-    status PetStatus,
+    status PetStatus default 'missing',
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT post_user_fk FOREIGN KEY(author_id) REFERENCES UserPet(id)
 );
@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS Post(
 CREATE TABLE IF NOT EXISTS Comment(
     id UUID NOT NULL PRIMARY KEY,
     comment_text TEXT NOT NULL,
-    user_id UUID NOT NULL,
+    author_id UUID NOT NULL,
     post_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT user_fk FOREIGN KEY(user_id) REFERENCES UserPet(id),
+    CONSTRAINT user_fk FOREIGN KEY(author_id) REFERENCES UserPet(id),
     CONSTRAINT post_fk FOREIGN KEY(post_id) REFERENCES Post(id)
 );
