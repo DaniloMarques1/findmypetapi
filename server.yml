@@ -143,8 +143,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-
+    get:
+      tags:
+        - Post
+      summary: Return all posts in descending order of creation time
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Will return all posts in descending order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPostResponse'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -279,6 +296,13 @@ components:
       properties:
         post:
           $ref: '#/components/schemas/Post'
+    GetPostResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
     Error:
       type: object
       properties:
