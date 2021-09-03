@@ -25,6 +25,8 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	var err error
 
 	app.Router = mux.NewRouter()
+	app.Router.Use(enableCors)
+
 	app.validator = validator.New()
 	app.DB, err = sql.Open("postgres", dbstring)
 	if err != nil {
@@ -63,4 +65,11 @@ func (app *App) Listen() {
 
 	log.Printf("Server starting...")
 	log.Fatal(server.ListenAndServe())
+}
+
+func enableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
 }
