@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var a app.App
+var App app.App
 
 func TestMain(m *testing.M) {
 	if err := godotenv.Load("../.env"); err != nil {
@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 	dbstring := fmt.Sprintf("host=%v dbname=%v password=%v user=%v sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PWD"), os.Getenv("DB_USER"))
 
-	a.Init("../database.sql", dbstring)
+	App.Init("../database.sql", dbstring)
 
 	code := m.Run()
 	cleanTables()
@@ -30,13 +30,13 @@ func TestMain(m *testing.M) {
 
 func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	a.Router.ServeHTTP(rr, request)
+	App.Router.ServeHTTP(rr, request)
 
 	return rr
 }
 
 func cleanTables() {
-	_, err := a.DB.Exec("truncate table userpet cascade; truncate table userpost cascade; truncate table post cascade;")
+	_, err := App.DB.Exec("truncate table userpet cascade; truncate table post cascade; truncate table comment cascade;")
 	if err != nil {
 		log.Fatalf("Error cleaning up the database %v\n", err)
 	}

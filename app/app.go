@@ -44,6 +44,10 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService, app.validator)
 
+	postRepo := repository.NewPostRepositorySql(app.DB)
+	postService := service.NewPostService(postRepo)
+	postHandler := handler.NewPostHandler(postService, app.validator)
+
 	app.Router.HandleFunc("/user",
 		userHandler.Save).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session",
@@ -52,6 +56,10 @@ func (app *App) Init(sqlFileName, dbstring string) {
 		userHandler.RefreshSession).Methods(http.MethodPut)
 	app.Router.Handle("/user",
 		util.AuthorizationMiddleware(http.HandlerFunc(userHandler.UpdateUser))).Methods(http.MethodPut)
+
+	// Post handelrs
+	app.Router.Handle("/post",
+		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.CreatePost))).Methods(http.MethodPost)
 }
 
 func (app *App) Listen() {
