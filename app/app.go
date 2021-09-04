@@ -13,6 +13,7 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 type App struct {
@@ -25,7 +26,6 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	var err error
 
 	app.Router = mux.NewRouter()
-	app.Router.Use(enableCors)
 
 	app.validator = validator.New()
 	app.DB, err = sql.Open("postgres", dbstring)
@@ -58,18 +58,12 @@ func (app *App) Init(sqlFileName, dbstring string) {
 
 func (app *App) Listen() {
 	port := os.Getenv("PORT")
+	handler := cors.Default().Handler(app.Router)
 	server := http.Server{
-		Handler: app.Router,
+		Handler: handler,
 		Addr:    ":" + port,
 	}
 
 	log.Printf("Server starting...")
 	log.Fatal(server.ListenAndServe())
-}
-
-func enableCors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		next.ServeHTTP(w, r)
-	})
 }
