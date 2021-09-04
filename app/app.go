@@ -68,7 +68,7 @@ func (app *App) Init(sqlFileName, dbstring string) {
 
 func (app *App) Listen() {
 	port := os.Getenv("PORT")
-	handler := cors.Default().Handler(app.Router)
+	handler := cors.AllowAll().Handler(app.Router)
 	server := http.Server{
 		Handler: handler,
 		Addr:    ":" + port,
