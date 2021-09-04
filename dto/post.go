@@ -2,12 +2,12 @@ package dto
 
 import "github.com/danilomarques1/findmypetapi/model"
 
-type CreatePostRequest struct {
+type CreatePostRequestDto struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
 
-type CreatePostResponse struct {
+type CreatePostResponseDto struct {
 	Post model.Post `json:"post"`
 }
 
