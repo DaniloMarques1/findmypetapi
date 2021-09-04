@@ -38,3 +38,13 @@ func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto, userId strin
 
 	return &response, nil
 }
+
+func (ps *PostService) GetAll() (*dto.GetPostResponseDto, error) {
+	posts, err := ps.postRepository.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.GetPostResponseDto{Posts: posts}
+	return &response, nil
+}

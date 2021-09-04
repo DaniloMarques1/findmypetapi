@@ -60,6 +60,8 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	// Post handelrs
 	app.Router.Handle("/post",
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.CreatePost))).Methods(http.MethodPost)
+	app.Router.Handle("/post",
+		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetAll))).Methods(http.MethodGet)
 }
 
 func (app *App) Listen() {

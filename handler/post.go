@@ -47,3 +47,13 @@ func (ph *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusCreated, response)
 }
+
+func (ph *PostHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	response, err := ph.postService.GetAll()
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}

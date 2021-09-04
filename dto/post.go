@@ -11,6 +11,6 @@ type CreatePostResponseDto struct {
 	Post model.Post `json:"post"`
 }
 
-type GetPostResponse struct {
-	Post []model.Post `json:"posts"`
+type GetPostResponseDto struct {
+	Posts []model.Post `json:"posts"`
 }
