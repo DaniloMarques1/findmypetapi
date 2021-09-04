@@ -8,6 +8,8 @@ info:
 tags:
   - name: User
     description: Endpoints for sign up and sign in users.
+  - name: Post
+    description: Endpoints related to creation/updates of posts
 
 paths:
   /user:
@@ -109,7 +111,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /post:
+    post:
+      tags:
+        - Post
+      summary: Creates a new post
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePostResponse'
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - Post
+      summary: Return all posts in descending order of creation time
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Will return all posts in descending order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPostResponse'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -126,6 +178,44 @@ components:
           maxLength: 60
         password_hash:
           type: string
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Post unique key
+        author_id:
+          type: string
+          description: Post author(user) id
+        title:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+          description: post image location
+        status:
+          type: string
+          enum: [missing, found]
+        created_at:
+          type: string
+          format: date-time
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: comment unique id
+        author_id:
+          type: string
+          description: comment author(user) unique id
+        post_id:
+          type: string
+          description: the post the comment was made to
+        created_at:
+          type: string
+          format: date-time
+
     CreateUserRequest:
       type: object
       properties:
@@ -192,6 +282,27 @@ components:
           type: string
         user:
           $ref: '#/components/schemas/User'
+    CreatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 800
+    CreatePostResponse:
+      type: object
+      properties:
+        post:
+          $ref: '#/components/schemas/Post'
+    GetPostResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
     Error:
       type: object
       properties:

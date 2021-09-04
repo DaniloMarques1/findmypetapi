@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// testing controllers
+
 func TestCreateUser(t *testing.T) {
 	cleanTables()
 	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
@@ -191,7 +193,7 @@ func TestUpdateUser(t *testing.T) {
 	body = `{"name": "Fitz New", "old_password": "123456", "new_password": "newpassword",
 		"confirm_password": "newpassword"}`
 	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
-	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	request.Header.Add("Authorization", "Bearer "+sessionResponse.Token)
 	assertNil(t, err)
 
 	response = executeRequest(request)
@@ -226,7 +228,7 @@ func TestUpdateUserError(t *testing.T) {
 	body = `{"name": "Fitz", "old_password": "wrongpassword", 
 		"new_password": "validnewpassword", "confirm_password": "validnewpassword"}`
 	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
-	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	request.Header.Add("Authorization", "Bearer "+sessionResponse.Token)
 	assertNil(t, err)
 	response = executeRequest(request)
 	assertEqual(t, http.StatusBadRequest, response.Code)
@@ -235,7 +237,7 @@ func TestUpdateUserError(t *testing.T) {
 	body = `{"old_password": "wrongpassword", 
 		"new_password": "validnewpassword", "confirm_password": "validnewpassword"}`
 	request, err = http.NewRequest(http.MethodPut, "/user", strings.NewReader(body))
-	request.Header.Add("Authorization", "Bearer " + sessionResponse.Token)
+	request.Header.Add("Authorization", "Bearer "+sessionResponse.Token)
 	assertNil(t, err)
 	response = executeRequest(request)
 	assertEqual(t, http.StatusBadRequest, response.Code)
@@ -248,3 +250,7 @@ func TestUpdateUserError(t *testing.T) {
 	response = executeRequest(request)
 	assertEqual(t, http.StatusUnauthorized, response.Code)
 }
+
+// testing repository
+
+// testing services

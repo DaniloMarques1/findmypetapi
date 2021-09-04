@@ -1,0 +1,12 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: fitz-postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: fitz
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: findmypet
