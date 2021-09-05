@@ -8,8 +8,8 @@ import (
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/util"
-	"github.com/gorilla/mux"
 	validator "github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 type PostHandler struct {
