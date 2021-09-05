@@ -43,7 +43,24 @@ func (pr *PostRepositorySql) Update(post *model.Post) error {
 }
 
 func (pr *PostRepositorySql) FindById(id string) (*model.Post, error) {
-	return nil, nil
+	stmt, err := pr.db.Prepare(`
+		select id, author_id, title, description, image_url, status, created_at
+		from post
+		where id = $1`)
+
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var post model.Post
+	err = stmt.QueryRow(id).Scan(&post.Id, &post.AuthorId, &post.Title,
+		&post.Description, &post.ImageUrl, &post.Status, &post.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &post, nil
 }
 
 func (pr *PostRepositorySql) FindPostByAuthor(author_id string) ([]model.Post, error) {

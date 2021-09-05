@@ -250,3 +250,31 @@ func TestGetAll(t *testing.T) {
 	assertNil(t, err)
 	assertEqual(t, 3, len(posts.Posts))
 }
+
+func TestFindById(t *testing.T) {
+	cleanTables()
+	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
+	postToBeCreated := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	uRepo := repository.NewUserRepositorySql(App.DB)
+
+	err := uRepo.Save(&user)
+	assertNil(t, err)
+
+	err = pRepo.Save(&postToBeCreated)
+	assertNil(t, err)
+
+	foundP, err := pRepo.FindById(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertNotNil(t, foundP)
+	assertEqual(t, foundP.Title, "Post title")
+	assertEqual(t, foundP.AuthorId, MOCK_USER_ID)
+}
