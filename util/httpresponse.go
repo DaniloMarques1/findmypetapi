@@ -9,7 +9,7 @@ import (
 
 func RespondJson(w http.ResponseWriter, status int, body interface{}) {
 	w.WriteHeader(status)
-	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(body)
 }
 
