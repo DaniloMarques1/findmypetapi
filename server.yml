@@ -186,7 +186,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetPostResponse'
-  /comment{post_id}:
+  /comment/{post_id}:
     post:
       tags:
         - Comment
@@ -213,6 +213,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateCommentResponse'
+    get:
+      tags:
+        - Comment
+      summary: Get all coments from a specific post
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      responses:
+        '200':
+          description: Array with all comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllComments'
 
 components:
   schemas:
@@ -375,6 +395,13 @@ components:
       properties:
         comment:
           $ref: '#/components/schemas/Comment'
+    GetAllComments:
+      type: object
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
     Error:
       type: object
       properties:
