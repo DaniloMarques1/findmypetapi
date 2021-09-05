@@ -10,6 +10,8 @@ tags:
     description: Endpoints for sign up and sign in users.
   - name: Post
     description: Endpoints related to creation/updates of posts
+  - name: Comment
+    description: Endpoints related to creation of comments to posts
 
 paths:
   /user:
@@ -184,6 +186,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetPostResponse'
+  /comment{post_id}:
+    post:
+      tags:
+        - Comment
+      summary: Adds a new comment to a post
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment added succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCommentResponse'
 
 components:
   schemas:
@@ -234,6 +263,9 @@ components:
         post_id:
           type: string
           description: the post the comment was made to
+        comment_test:
+          type: string
+          maxLength: 400
         created_at:
           type: string
           format: date-time
@@ -330,6 +362,19 @@ components:
       properties:
         post:
           $ref: '#/components/schemas/Post'
+    CreateCommentRequest:
+      type: object
+      properties:
+        comment_test:
+          type: string
+          maxLength: 400
+      required:
+        - comment_test
+    CreateCommentResponse:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/Comment'
     Error:
       type: object
       properties:

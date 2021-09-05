@@ -14,6 +14,16 @@ import (
 
 var App app.App
 
+const (
+	MOCK_POST1_ID   = "a5886fcf-1de6-462c-8346-d85f72bed0ed"
+	MOCK_POST2_ID   = "f25f265b-0c3c-4ecf-a407-675bfa997555"
+	MOCK_POST3_ID   = "9e7b5ef7-f28e-4002-bb85-547cca88586b"
+	MOCK_USER_ID    = "124e4567-e89b-12d3-a456-426614174000"
+	MOCK_USER_NAME  = "Fitz"
+	MOCK_USER_EMAIL = "fitz@gmail.com"
+	MOCK_COMMENT_ID = "dfa3dff3-370d-4618-a04f-ed2dd3b2019b"
+)
+
 func TestMain(m *testing.M) {
 	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatalf("Error loading env variables %v\n", err)
