@@ -40,12 +40,22 @@ func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto,
 	return &response, nil
 }
 
-func (ps *PostService) GetAll() (*dto.GetPostResponseDto, error) {
+func (ps *PostService) GetAll() (*dto.GetPostsResponseDto, error) {
 	posts, err := ps.postRepository.FindAll()
 	if err != nil {
 		return nil, err
 	}
 
-	response := dto.GetPostResponseDto{Posts: posts}
+	response := dto.GetPostsResponseDto{Posts: posts}
+	return &response, nil
+}
+
+func (ps *PostService) FindById(id string) (*dto.GetPostResponseDto, error) {
+	post, err := ps.postRepository.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.GetPostResponseDto{Post: *post}
 	return &response, nil
 }

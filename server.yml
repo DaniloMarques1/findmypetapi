@@ -155,13 +155,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetPostResponse'
+                $ref: '#/components/schemas/GetPostsResponse'
         '401':
           description: Invalid token
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /post/{post_id}:
+    get:
+      tags:
+        - Post
+      summary: Get a specific by its id
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Return the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPostResponse'
 
 components:
   schemas:
@@ -296,13 +318,18 @@ components:
       properties:
         post:
           $ref: '#/components/schemas/Post'
-    GetPostResponse:
+    GetPostsResponse:
       type: object
       properties:
         posts:
           type: array
           items:
             $ref: '#/components/schemas/Post'
+    GetPostResponse:
+      type: object
+      properties:
+        post:
+          $ref: '#/components/schemas/Post'
     Error:
       type: object
       properties:

@@ -8,7 +8,7 @@ import (
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/util"
-
+	"github.com/gorilla/mux"
 	validator "github.com/go-playground/validator/v10"
 )
 
@@ -50,6 +50,18 @@ func (ph *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 func (ph *PostHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	response, err := ph.postService.GetAll()
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}
+
+func (ph *PostHandler) GetOne(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["post_id"]
+	response, err := ph.postService.FindById(postId)
 	if err != nil {
 		util.HandleError(w, err)
 		return

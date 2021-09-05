@@ -3,8 +3,10 @@ package repository
 import (
 	"database/sql"
 	"log"
+	"net/http"
 
 	"github.com/danilomarques1/findmypetapi/model"
+	"github.com/danilomarques1/findmypetapi/util"
 )
 
 type PostRepositorySql struct {
@@ -49,6 +51,7 @@ func (pr *PostRepositorySql) FindById(id string) (*model.Post, error) {
 		where id = $1`)
 
 	if err != nil {
+		log.Printf("Error building query %v\n", err)
 		return nil, err
 	}
 	defer stmt.Close()
@@ -57,7 +60,8 @@ func (pr *PostRepositorySql) FindById(id string) (*model.Post, error) {
 	err = stmt.QueryRow(id).Scan(&post.Id, &post.AuthorId, &post.Title,
 		&post.Description, &post.ImageUrl, &post.Status, &post.CreatedAt)
 	if err != nil {
-		return nil, err
+		log.Printf("Error querying row %v\n", err)
+		return nil, util.NewApiError("No post found", http.StatusNotFound)
 	}
 
 	return &post, nil

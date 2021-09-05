@@ -72,6 +72,7 @@ func TestCreatePostService(t *testing.T) {
 	assertNil(t, err)
 	assertEqual(t, "Post title", response.Post.Title)
 	assertEqual(t, MOCK_USER_ID, response.Post.AuthorId)
+	assertNotEqual(t, "", response.Post.CreatedAt)
 }
 
 func TestCreatePost(t *testing.T) {
@@ -245,13 +246,13 @@ func TestGetAll(t *testing.T) {
 	response := executeRequest(request)
 	assertEqual(t, http.StatusOK, response.Code)
 
-	var posts dto.GetPostResponseDto
+	var posts dto.GetPostsResponseDto
 	err = json.NewDecoder(response.Body).Decode(&posts)
 	assertNil(t, err)
 	assertEqual(t, 3, len(posts.Posts))
 }
 
-func TestFindById(t *testing.T) {
+func TestFindByIdRepository(t *testing.T) {
 	cleanTables()
 	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
 	postToBeCreated := model.Post{
@@ -277,4 +278,59 @@ func TestFindById(t *testing.T) {
 	assertNotNil(t, foundP)
 	assertEqual(t, foundP.Title, "Post title")
 	assertEqual(t, foundP.AuthorId, MOCK_USER_ID)
+}
+
+func TestFindByIdService(t *testing.T) {
+	cleanTables()
+	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
+	postToBeCreated := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	uRepo := repository.NewUserRepositorySql(App.DB)
+
+	err := uRepo.Save(&user)
+	assertNil(t, err)
+	err = pRepo.Save(&postToBeCreated)
+	assertNil(t, err)
+
+	pService := service.NewPostService(pRepo)
+	response, err := pService.FindById(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, MOCK_USER_ID, response.Post.AuthorId)
+	assertEqual(t, MOCK_POST1_ID, response.Post.Id)
+}
+
+func TestGetOne(t *testing.T) {
+	cleanTables()
+	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
+	postToBeCreated := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	uRepo := repository.NewUserRepositorySql(App.DB)
+
+	err := uRepo.Save(&user)
+	assertNil(t, err)
+	err = pRepo.Save(&postToBeCreated)
+	assertNil(t, err)
+
+	token, _, err := util.NewToken(MOCK_USER_ID)
+	request, err := http.NewRequest(http.MethodGet, "/post/"+MOCK_POST1_ID, nil)
+	assertNil(t, err)
+	request.Header.Set("Authorization", "Bearer "+token)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
 }

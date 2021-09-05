@@ -62,6 +62,8 @@ func (app *App) Init(sqlFileName, dbstring string) {
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.CreatePost))).Methods(http.MethodPost)
 	app.Router.Handle("/post",
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetAll))).Methods(http.MethodGet)
+	app.Router.Handle("/post/{post_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetOne))).Methods(http.MethodGet)
 }
 
 func (app *App) Listen() {
