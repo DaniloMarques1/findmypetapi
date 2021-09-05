@@ -10,6 +10,8 @@ tags:
     description: Endpoints for sign up and sign in users.
   - name: Post
     description: Endpoints related to creation/updates of posts
+  - name: Comment
+    description: Endpoints related to creation of comments to posts
 
 paths:
   /user:
@@ -155,13 +157,82 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetPostResponse'
+                $ref: '#/components/schemas/GetPostsResponse'
         '401':
           description: Invalid token
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /post/{post_id}:
+    get:
+      tags:
+        - Post
+      summary: Get a specific by its id
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Return the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPostResponse'
+  /comment/{post_id}:
+    post:
+      tags:
+        - Comment
+      summary: Adds a new comment to a post
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment added succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCommentResponse'
+    get:
+      tags:
+        - Comment
+      summary: Get all coments from a specific post
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: string
+          required: true
+          description: Post unique identifier
+      responses:
+        '200':
+          description: Array with all comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllComments'
 
 components:
   schemas:
@@ -212,6 +283,9 @@ components:
         post_id:
           type: string
           description: the post the comment was made to
+        comment_test:
+          type: string
+          maxLength: 400
         created_at:
           type: string
           format: date-time
@@ -296,13 +370,38 @@ components:
       properties:
         post:
           $ref: '#/components/schemas/Post'
-    GetPostResponse:
+    GetPostsResponse:
       type: object
       properties:
         posts:
           type: array
           items:
             $ref: '#/components/schemas/Post'
+    GetPostResponse:
+      type: object
+      properties:
+        post:
+          $ref: '#/components/schemas/Post'
+    CreateCommentRequest:
+      type: object
+      properties:
+        comment_test:
+          type: string
+          maxLength: 400
+      required:
+        - comment_test
+    CreateCommentResponse:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/Comment'
+    GetAllComments:
+      type: object
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
     Error:
       type: object
       properties:

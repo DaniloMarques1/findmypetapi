@@ -50,6 +50,10 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	postService := service.NewPostService(postRepo)
 	postHandler := handler.NewPostHandler(postService, app.validator)
 
+	commentRepo := repository.NewCommentRepositorySql(app.DB)
+	commentService := service.NewCommentService(commentRepo)
+	commentHandler := handler.NewCommentHandler(commentService, app.validator)
+
 	app.Router.HandleFunc("/user",
 		userHandler.Save).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session",
@@ -64,6 +68,12 @@ func (app *App) Init(sqlFileName, dbstring string) {
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.CreatePost))).Methods(http.MethodPost)
 	app.Router.Handle("/post",
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetAll))).Methods(http.MethodGet)
+	app.Router.Handle("/post/{post_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetOne))).Methods(http.MethodGet)
+
+	// comment handlers
+	app.Router.Handle("/comment/{post_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(commentHandler.CreateComment))).Methods(http.MethodPost)
 }
 
 func (app *App) Listen() {
