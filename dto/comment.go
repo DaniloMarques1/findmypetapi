@@ -9,3 +9,7 @@ type CreateCommentRequestDto struct {
 type CreateCommentResponseDto struct {
 	Comment model.Comment `json:"comment"`
 }
+
+type GetCommentsResponseDto struct {
+	Comments []model.Comment `json:"comments"`
+}

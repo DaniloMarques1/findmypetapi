@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/danilomarques1/findmypetapi/model"
 )
@@ -38,5 +39,37 @@ func (cr *CommentRepositorySql) Save(comment *model.Comment) error {
 }
 
 func (cr *CommentRepositorySql) FindAll(postId string) ([]model.Comment, error) {
-	return nil, nil
+	// TODO find a way to verify if post exist first
+	stmt, err := cr.db.Prepare(`
+		select id, author_id, post_id, comment_text, created_at
+		from comment
+		where post_id = $1
+	`)
+	if err != nil {
+		log.Printf("Error scanning %v\n", err)
+		return nil, err
+	}
+	defer stmt.Close()
+
+	comments := make([]model.Comment, 0)
+	rows, err := stmt.Query(postId)
+	if err != nil {
+		log.Printf("Error scanning %v\n", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		log.Printf("Reading a new line...\n")
+		var comment model.Comment
+		err = rows.Scan(&comment.Id, &comment.AuthorId, &comment.PostId,
+			&comment.CommentText, &comment.CreatedAt)
+		if err != nil {
+			log.Printf("Error scanning %v\n", err)
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
 }

@@ -47,3 +47,15 @@ func (ch *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) 
 
 	util.RespondJson(w, http.StatusCreated, response)
 }
+
+func (ch *CommentHandler) FindAll(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postId := vars["post_id"]
+	response, err := ch.commentService.FindAll(postId)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}

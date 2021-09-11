@@ -41,6 +41,23 @@ func (pr *PostRepositorySql) Save(post *model.Post) error {
 }
 
 func (pr *PostRepositorySql) Update(post *model.Post) error {
+	stmt, err := pr.db.Prepare(`
+		update post
+		set title = $1, description = $2, status = $3
+		where id = $4
+	`)
+	if err != nil {
+		log.Printf("Error creating statement update %v\n", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(post.Title, post.Description, post.Status, post.Id)
+	if err != nil {
+		log.Printf("Error executing update %v\n", err)
+		return err
+	}
+
 	return nil
 }
 

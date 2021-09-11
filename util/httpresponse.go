@@ -9,7 +9,7 @@ import (
 
 func RespondJson(w http.ResponseWriter, status int, body interface{}) {
 	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
+        //w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(body)
 }
 
@@ -18,6 +18,7 @@ func HandleError(w http.ResponseWriter, err error) {
 	case *ApiError:
 		RespondJson(w, v.Code, dto.ErrorDto{Message: v.Message})
 	default:
-		RespondJson(w, http.StatusInternalServerError, dto.ErrorDto{Message: "Unnexpected error"})
+		RespondJson(w, http.StatusInternalServerError,
+			dto.ErrorDto{Message: "Unnexpected error"})
 	}
 }

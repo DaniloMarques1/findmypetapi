@@ -77,7 +77,7 @@ func TestCreateSession(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 
 	var sessionResponse dto.SessionResponseDto
 	err = json.NewDecoder(response.Body).Decode(&sessionResponse)
@@ -119,7 +119,7 @@ func TestRefreshSession(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 
 	var responseDto dto.SessionResponseDto
 	err = json.NewDecoder(response.Body).Decode(&responseDto)
@@ -145,7 +145,7 @@ func TestRefreshSessionError(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 
 	var responseDto dto.SessionResponseDto
 	err = json.NewDecoder(response.Body).Decode(&responseDto)
@@ -185,7 +185,7 @@ func TestUpdateUser(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 	var sessionResponse dto.SessionResponseDto
 	err = json.NewDecoder(response.Body).Decode(&sessionResponse)
 	assertNil(t, err)
@@ -203,7 +203,7 @@ func TestUpdateUser(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 }
 
 func TestUpdateUserError(t *testing.T) {
@@ -219,7 +219,7 @@ func TestUpdateUserError(t *testing.T) {
 	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	assertNil(t, err)
 	response = executeRequest(request)
-	assertEqual(t, http.StatusOK, response.Code)
+	assertEqual(t, http.StatusCreated, response.Code)
 	var sessionResponse dto.SessionResponseDto
 	err = json.NewDecoder(response.Body).Decode(&sessionResponse)
 	assertNil(t, err)

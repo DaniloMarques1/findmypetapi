@@ -69,3 +69,29 @@ func (ph *PostHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusOK, response)
 }
+
+func (ph *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var updateDto dto.UpdatePostRequestDto
+	if err := json.NewDecoder(r.Body).Decode(&updateDto); err != nil {
+		log.Printf("Error parsing body %v\n", err)
+		util.RespondJson(w, http.StatusBadRequest,
+			dto.ErrorDto{Message: "Invalid body"})
+		return
+	}
+	if err := ph.validator.Struct(updateDto); err != nil {
+		log.Printf("Error validating body %v\n", err)
+		util.RespondJson(w, http.StatusBadRequest,
+			dto.ErrorDto{Message: "Invalid body"})
+		return
+	}
+
+	vars := mux.Vars(r)
+	postId := vars["post_id"]
+	err := ph.postService.Update(updateDto, postId)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusNoContent, nil)
+}

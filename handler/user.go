@@ -65,7 +65,7 @@ func (uh *UserHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, response)
+	util.RespondJson(w, http.StatusCreated, response)
 }
 
 func (uh *UserHandler) RefreshSession(w http.ResponseWriter, r *http.Request) {

@@ -59,3 +59,19 @@ func (ps *PostService) FindById(id string) (*dto.GetPostResponseDto, error) {
 	response := dto.GetPostResponseDto{Post: *post}
 	return &response, nil
 }
+
+func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, postId string) error {
+	post, err := ps.postRepository.FindById(postId)
+	if err != nil {
+		return err
+	}
+	post.Title = updateDto.Title
+	post.Description = updateDto.Description
+	post.Status = updateDto.Status
+	err = ps.postRepository.Update(post)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

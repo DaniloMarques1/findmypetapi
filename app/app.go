@@ -26,6 +26,7 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	var err error
 
 	app.Router = mux.NewRouter()
+	app.Router.Use(contentTypeMiddleware)
 
 	app.validator = validator.New()
 	app.DB, err = sql.Open("postgres", dbstring)
@@ -61,19 +62,29 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	app.Router.HandleFunc("/session/refresh",
 		userHandler.RefreshSession).Methods(http.MethodPut)
 	app.Router.Handle("/user",
-		util.AuthorizationMiddleware(http.HandlerFunc(userHandler.UpdateUser))).Methods(http.MethodPut)
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			userHandler.UpdateUser))).Methods(http.MethodPut)
 
 	// Post handelrs
 	app.Router.Handle("/post",
 		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.CreatePost))).Methods(http.MethodPost)
 	app.Router.Handle("/post",
-		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetAll))).Methods(http.MethodGet)
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			postHandler.GetAll))).Methods(http.MethodGet)
 	app.Router.Handle("/post/{post_id}",
-		util.AuthorizationMiddleware(http.HandlerFunc(postHandler.GetOne))).Methods(http.MethodGet)
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			postHandler.GetOne))).Methods(http.MethodGet)
+	app.Router.Handle("/post/{post_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			postHandler.Update))).Methods(http.MethodPut)
 
 	// comment handlers
 	app.Router.Handle("/comment/{post_id}",
-		util.AuthorizationMiddleware(http.HandlerFunc(commentHandler.CreateComment))).Methods(http.MethodPost)
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			commentHandler.CreateComment))).Methods(http.MethodPost)
+	app.Router.Handle("/comment/{post_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(
+			commentHandler.FindAll))).Methods(http.MethodGet)
 }
 
 func (app *App) Listen() {
@@ -86,4 +97,11 @@ func (app *App) Listen() {
 
 	log.Printf("Server starting...")
 	log.Fatal(server.ListenAndServe())
+}
+
+func contentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
 }

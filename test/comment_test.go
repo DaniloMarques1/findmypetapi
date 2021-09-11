@@ -122,3 +122,127 @@ func TestCreateComment(t *testing.T) {
 	response := executeRequest(request)
 	assertEqual(t, http.StatusCreated, response.Code)
 }
+
+func TestFindCommentsRepository(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+
+	uR := repository.NewUserRepositorySql(App.DB)
+	err := uR.Save(&user)
+	assertNil(t, err)
+
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	err = pRepo.Save(&post)
+	assertNil(t, err)
+
+	comment1 := model.Comment{
+		Id:          MOCK_COMMENT_ID,
+		AuthorId:    MOCK_USER_ID,
+		PostId:      MOCK_POST1_ID,
+		CommentText: "New commentary",
+	}
+	cRepo := repository.NewCommentRepositorySql(App.DB)
+	err = cRepo.Save(&comment1)
+	assertNil(t, err)
+
+	comments, err := cRepo.FindAll(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, 1, len(comments))
+}
+
+func TestFindCommentsService(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+
+	uR := repository.NewUserRepositorySql(App.DB)
+	err := uR.Save(&user)
+	assertNil(t, err)
+
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	err = pRepo.Save(&post)
+	assertNil(t, err)
+
+	comment1 := model.Comment{
+		Id:          MOCK_COMMENT_ID,
+		AuthorId:    MOCK_USER_ID,
+		PostId:      MOCK_POST1_ID,
+		CommentText: "New commentary",
+	}
+	cRepo := repository.NewCommentRepositorySql(App.DB)
+	err = cRepo.Save(&comment1)
+	assertNil(t, err)
+
+	cservice := service.NewCommentService(cRepo)
+	comments, err := cservice.FindAll(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, 1, len(comments.Comments))
+}
+
+func TestFindComments(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+
+	uR := repository.NewUserRepositorySql(App.DB)
+	err := uR.Save(&user)
+	assertNil(t, err)
+
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title",
+		Description: "Post Description",
+		ImageUrl:    "/path/to/image",
+		Status:      "missing",
+	}
+
+	pRepo := repository.NewPostRepositorySql(App.DB)
+	err = pRepo.Save(&post)
+	assertNil(t, err)
+
+	comment1 := model.Comment{
+		Id:          MOCK_COMMENT_ID,
+		AuthorId:    MOCK_USER_ID,
+		PostId:      MOCK_POST1_ID,
+		CommentText: "New commentary",
+	}
+	cRepo := repository.NewCommentRepositorySql(App.DB)
+	err = cRepo.Save(&comment1)
+	assertNil(t, err)
+	request, err := http.NewRequest(http.MethodGet, "/comment/"+MOCK_POST1_ID, nil)
+	assertNil(t, err)
+	token, _, err := util.NewToken(MOCK_USER_ID)
+	assertNil(t, err)
+	request.Header.Add("Authorization", "Bearer "+token)
+	response := executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+}

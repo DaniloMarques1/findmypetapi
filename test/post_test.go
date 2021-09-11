@@ -325,3 +325,127 @@ func TestGetOne(t *testing.T) {
 	response := executeRequest(request)
 	assertEqual(t, http.StatusOK, response.Code)
 }
+
+func TestUpdatePostRepository(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+	post1 := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	post2 := model.Post{
+		Id:          MOCK_POST2_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 2",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+	err := ur.Save(&user)
+	assertNil(t, err)
+	err = pr.Save(&post1)
+	assertNil(t, err)
+	err = pr.Save(&post2)
+	assertNil(t, err)
+
+	post1.Title = "New Post title"
+	post1.Description = "New description"
+	err = pr.Update(&post1)
+	assertNil(t, err)
+
+	fPost1, err := pr.FindById(MOCK_POST1_ID)
+	assertNil(t, err)
+	fPost2, err := pr.FindById(MOCK_POST2_ID)
+	assertNil(t, err)
+
+	assertNotNil(t, fPost1)
+	assertEqual(t, "New Post title", fPost1.Title)
+	assertEqual(t, "Post title 2", fPost2.Title)
+}
+
+func TestUpdatePostService(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+
+	err := ur.Save(&user)
+	assertNil(t, err)
+	pr.Save(&post)
+	assertNil(t, err)
+
+	pservice := service.NewPostService(pr)
+	updateDto := dto.UpdatePostRequestDto{
+		Title:       "New post title",
+		Description: "New description title",
+		Status:      "missing",
+	}
+	err = pservice.Update(updateDto, MOCK_POST1_ID)
+	assertNil(t, err)
+	fpost, err := pr.FindById(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, "New post title", fpost.Title)
+}
+
+func TestUpdatePost(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+	err := ur.Save(&user)
+	assertNil(t, err)
+	pr.Save(&post)
+	assertNil(t, err)
+
+	body := `
+		{
+			"title": "New post title",
+			"description": "New description",
+			"status": "missing"
+		}
+	`
+	token, _, err := util.NewToken(MOCK_USER_ID)
+	assertNil(t, err)
+	request, err := http.NewRequest(http.MethodPut, "/post/"+MOCK_POST1_ID,
+		strings.NewReader(body))
+	assertNil(t, err)
+	request.Header.Add("Authorization", "Bearer "+token)
+
+	response := executeRequest(request)
+	assertEqual(t, http.StatusNoContent, response.Code)
+
+	fpost, err := pr.FindById(MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, "New post title", fpost.Title)
+}

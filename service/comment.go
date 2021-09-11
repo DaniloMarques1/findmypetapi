@@ -21,9 +21,9 @@ func (cs *CommentService) Save(userId, postId string,
 	// TODO produce rabbit mq message
 	id := uuid.NewString()
 	comment := model.Comment{
-		Id: id,
-		AuthorId: userId,
-		PostId: postId,
+		Id:          id,
+		AuthorId:    userId,
+		PostId:      postId,
 		CommentText: request.CommentText,
 	}
 	err := cs.commentRepository.Save(&comment)
@@ -33,6 +33,16 @@ func (cs *CommentService) Save(userId, postId string,
 	response := dto.CreateCommentResponseDto{
 		Comment: comment,
 	}
+
+	return &response, nil
+}
+
+func (cs *CommentService) FindAll(postId string) (*dto.GetCommentsResponseDto, error) {
+	comments, err := cs.commentRepository.FindAll(postId)
+	if err != nil {
+		return nil, err
+	}
+	response := dto.GetCommentsResponseDto{Comments: comments}
 
 	return &response, nil
 }
