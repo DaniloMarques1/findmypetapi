@@ -186,6 +186,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetPostResponse'
+    put:
+      tags:
+        - Post
+      summary: Updates a post
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          description: Unique identifier of a post
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '204':
+          description: Post updated
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /comment/{post_id}:
     post:
       tags:
@@ -213,6 +248,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateCommentResponse'
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     get:
       tags:
         - Comment
@@ -233,6 +280,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAllComments'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -382,6 +435,24 @@ components:
       properties:
         post:
           $ref: '#/components/schemas/Post'
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 800
+        status:
+          type: string
+          enum: [missing, found]
+      required:
+        - title
+        - description
+
+
+
     CreateCommentRequest:
       type: object
       properties:
