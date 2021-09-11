@@ -76,7 +76,7 @@ paths:
             schema:
               $ref: '#/components/schemas/SessionRequestDto'
       responses:
-        '200':
+        '201':
           description: Session created
           content:
             application/json:
@@ -336,7 +336,7 @@ components:
         post_id:
           type: string
           description: the post the comment was made to
-        comment_test:
+        comment_text:
           type: string
           maxLength: 400
         created_at:
@@ -450,6 +450,7 @@ components:
       required:
         - title
         - description
+        - status
 
 
 
