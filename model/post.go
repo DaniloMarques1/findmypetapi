@@ -16,6 +16,6 @@ type PostRepository interface {
 	Save(*Post) error
 	FindById(id string) (*Post, error)
 	Update(*Post) error
-	FindPostByAuthor(author_id string) ([]Post, error)
+	FindPostByAuthor(authorId, poid string) (*Post, error)
 	FindAll() ([]Post, error)
 }

@@ -400,7 +400,7 @@ func TestUpdatePostService(t *testing.T) {
 		Description: "New description title",
 		Status:      "missing",
 	}
-	err = pservice.Update(updateDto, MOCK_POST1_ID)
+	err = pservice.Update(updateDto, MOCK_USER_ID, MOCK_POST1_ID)
 	assertNil(t, err)
 	fpost, err := pr.FindById(MOCK_POST1_ID)
 	assertNil(t, err)
@@ -448,4 +448,31 @@ func TestUpdatePost(t *testing.T) {
 	fpost, err := pr.FindById(MOCK_POST1_ID)
 	assertNil(t, err)
 	assertEqual(t, "New post title", fpost.Title)
+}
+
+func TestFindByAuthorRepository(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+	post := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+	err := ur.Save(&user)
+	assertNil(t, err)
+	pr.Save(&post)
+	assertNil(t, err)
+
+	fpost, err := pr.FindPostByAuthor(MOCK_USER_ID, MOCK_POST1_ID)
+	assertNil(t, err)
+	assertEqual(t, "Post title 1", fpost.Title)
+	assertEqual(t, MOCK_USER_ID, fpost.AuthorId)
 }
