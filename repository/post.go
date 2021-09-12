@@ -84,8 +84,27 @@ func (pr *PostRepositorySql) FindById(id string) (*model.Post, error) {
 	return &post, nil
 }
 
-func (pr *PostRepositorySql) FindPostByAuthor(author_id string) ([]model.Post, error) {
-	return nil, nil
+func (pr *PostRepositorySql) FindPostByAuthor(authorId, postId string) (*model.Post, error) {
+	stmt, err := pr.db.Prepare(`
+		select id, author_id, title, description, created_at
+		from post
+		where author_id = $1 and id = $2
+	`)
+	if err != nil {
+		log.Printf("Error preparing statement post %v\n", err)
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var post model.Post
+	err = stmt.QueryRow(authorId, postId).Scan(&post.Id, &post.AuthorId,
+		&post.Title, &post.Description, &post.CreatedAt)
+	if err != nil {
+		log.Printf("Error querying post %v\n", err)
+		return nil, err
+	}
+
+	return &post, nil
 }
 
 func (pr *PostRepositorySql) FindAll() ([]model.Post, error) {

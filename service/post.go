@@ -1,8 +1,12 @@
 package service
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/model"
+	"github.com/danilomarques1/findmypetapi/util"
 	"github.com/google/uuid"
 )
 
@@ -60,7 +64,13 @@ func (ps *PostService) FindById(id string) (*dto.GetPostResponseDto, error) {
 	return &response, nil
 }
 
-func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, postId string) error {
+func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, authorId, postId string) error {
+	_, err := ps.postRepository.FindPostByAuthor(authorId, postId)
+	if err != nil {
+		log.Printf("No posts were found for this user")
+		return util.NewApiError("Post not found", http.StatusNotFound)
+	}
+
 	post, err := ps.postRepository.FindById(postId)
 	if err != nil {
 		return err

@@ -87,7 +87,8 @@ func (ph *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	postId := vars["post_id"]
-	err := ph.postService.Update(updateDto, postId)
+	userId := r.Header.Get("user_id")
+	err := ph.postService.Update(updateDto, userId, postId)
 	if err != nil {
 		util.HandleError(w, err)
 		return
