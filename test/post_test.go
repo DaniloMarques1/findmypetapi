@@ -143,7 +143,7 @@ func TestFindAllRepository(t *testing.T) {
 	assertNil(t, err)
 	assertNotNil(t, posts)
 	assertEqual(t, 3, len(posts))
-	assertEqual(t, "Post 1", posts[0].Title)
+	assertEqual(t, "Post 1", posts[2].Title) // order by desc post creation
 }
 
 func TestGetAllPostsService(t *testing.T) {

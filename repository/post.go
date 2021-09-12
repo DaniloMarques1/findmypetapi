@@ -110,7 +110,8 @@ func (pr *PostRepositorySql) FindPostByAuthor(authorId, postId string) (*model.P
 func (pr *PostRepositorySql) FindAll() ([]model.Post, error) {
 	stmt, err := pr.db.Prepare(`
 		select id, author_id, title, description, image_url, status, created_at
-		from post`)
+		from post
+		order by created_at desc`)
 	if err != nil {
 		log.Printf("Error preparing statement %v\n", err)
 		return nil, err
