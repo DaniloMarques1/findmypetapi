@@ -1,6 +1,7 @@
 package test
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -11,6 +12,20 @@ import (
 	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/util"
 )
+
+type ProducerMock struct {
+}
+
+func (p *ProducerMock) Publish(key1, key2 string) error {
+	log.Printf("Publishing message...\n")
+
+	return nil
+}
+
+func (p *ProducerMock) Setup() error {
+	log.Printf("Setting up producer...\n")
+	return nil
+}
 
 func TestSaveCommentRepository(t *testing.T) {
 	cleanTables()
@@ -80,7 +95,8 @@ func TestSaveCommentService(t *testing.T) {
 	}
 
 	cRepo := repository.NewCommentRepositorySql(App.DB)
-	cService := service.NewCommentService(cRepo)
+	producer := ProducerMock{}
+	cService := service.NewCommentService(cRepo, &producer)
 	response, err := cService.Save(MOCK_USER_ID, MOCK_POST1_ID, requestDto)
 	assertNil(t, err)
 	assertEqual(t, MOCK_USER_ID, response.Comment.AuthorId)
@@ -198,7 +214,7 @@ func TestFindCommentsService(t *testing.T) {
 	err = cRepo.Save(&comment1)
 	assertNil(t, err)
 
-	cservice := service.NewCommentService(cRepo)
+	cservice := service.NewCommentService(cRepo, &ProducerMock{})
 	comments, err := cservice.FindAll(MOCK_POST1_ID)
 	assertNil(t, err)
 	assertEqual(t, 1, len(comments.Comments))

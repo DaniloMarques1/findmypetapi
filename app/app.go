@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/danilomarques1/findmypetapi/handler"
+	"github.com/danilomarques1/findmypetapi/lib"
 	"github.com/danilomarques1/findmypetapi/repository"
 	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/util"
@@ -14,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
+	"github.com/streadway/amqp"
 )
 
 type App struct {
@@ -52,7 +54,15 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	postHandler := handler.NewPostHandler(postService, app.validator)
 
 	commentRepo := repository.NewCommentRepositorySql(app.DB)
-	commentService := service.NewCommentService(commentRepo)
+	connection, err := amqp.Dial(os.Getenv("RABBIT_URL"))
+	if err != nil {
+		log.Fatalf("Error connecting to rabbit mq %v\n", err)
+	}
+	producer, err := lib.NewAmqpProducer(connection, app.DB)
+	if err != nil {
+		log.Fatalf("Error setting up producer %v\n", err)
+	}
+	commentService := service.NewCommentService(commentRepo, producer)
 	commentHandler := handler.NewCommentHandler(commentService, app.validator)
 
 	app.Router.HandleFunc("/user",

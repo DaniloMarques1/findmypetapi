@@ -10,3 +10,9 @@ services:
       POSTGRES_USER: fitz
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: findmypet
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: fitz-rabbit
+    ports:
+      - 15672:15672
+      - 5672:5672

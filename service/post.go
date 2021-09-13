@@ -22,8 +22,6 @@ func NewPostService(postRepository model.PostRepository) *PostService {
 
 func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto,
 	userId string) (*dto.CreatePostResponseDto, error) {
-	// TODO produce a rabbit mq message
-
 	postId := uuid.NewString()
 	post := model.Post{
 		Id:          postId,

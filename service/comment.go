@@ -1,27 +1,33 @@
 package service
 
 import (
+	"log"
+
 	"github.com/danilomarques1/findmypetapi/dto"
+	"github.com/danilomarques1/findmypetapi/lib"
 	"github.com/danilomarques1/findmypetapi/model"
 	"github.com/google/uuid"
 )
 
 type CommentService struct {
 	commentRepository model.CommentRepository
+	producer          lib.Producer
 }
 
-func NewCommentService(commentRepository model.CommentRepository) *CommentService {
+func NewCommentService(commentRepository model.CommentRepository,
+	producer lib.Producer) *CommentService {
 	return &CommentService{
 		commentRepository: commentRepository,
+		producer:          producer,
 	}
 }
 
 func (cs *CommentService) Save(userId, postId string,
 	request dto.CreateCommentRequestDto) (*dto.CreateCommentResponseDto, error) {
 	// TODO produce rabbit mq message
-	id := uuid.NewString()
+	commentId := uuid.NewString()
 	comment := model.Comment{
-		Id:          id,
+		Id:          commentId,
 		AuthorId:    userId,
 		PostId:      postId,
 		CommentText: request.CommentText,
@@ -32,6 +38,11 @@ func (cs *CommentService) Save(userId, postId string,
 	}
 	response := dto.CreateCommentResponseDto{
 		Comment: comment,
+	}
+	err = cs.producer.Publish(postId, commentId)
+	if err != nil {
+		// TODO how to handle errors
+		log.Printf("Error publishing message %v\n", err)
 	}
 
 	return &response, nil

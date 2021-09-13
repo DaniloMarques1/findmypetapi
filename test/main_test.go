@@ -29,7 +29,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Error loading env variables %v\n", err)
 	}
 	dbstring := fmt.Sprintf("host=%v dbname=%v password=%v user=%v sslmode=disable",
-		os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PWD"), os.Getenv("DB_USER"))
+		os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PWD"),
+		os.Getenv("DB_USER"))
 
 	App.Init("../database.sql", dbstring)
 
@@ -46,7 +47,11 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 }
 
 func cleanTables() {
-	_, err := App.DB.Exec("truncate table userpet cascade; truncate table post cascade; truncate table comment cascade;")
+	_, err := App.DB.Exec(`
+		truncate table userpet cascade;
+		truncate table post cascade;
+		truncate table comment cascade;
+		`)
 	if err != nil {
 		log.Fatalf("Error cleaning up the database %v\n", err)
 	}
@@ -54,7 +59,8 @@ func cleanTables() {
 
 func assertEqual(t *testing.T, expect, actual interface{}) {
 	if expect != actual {
-		t.Fatalf(fmt.Sprintf("\nExpected value: %v\nActual value: %v\n", expect, actual))
+		t.Fatalf(fmt.Sprintf("\nExpected value: %v\nActual value: %v\n",
+			expect, actual))
 	}
 }
 
