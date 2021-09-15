@@ -24,7 +24,6 @@ func NewCommentService(commentRepository model.CommentRepository,
 
 func (cs *CommentService) Save(userId, postId string,
 	request dto.CreateCommentRequestDto) (*dto.CreateCommentResponseDto, error) {
-	// TODO produce rabbit mq message
 	commentId := uuid.NewString()
 	comment := model.Comment{
 		Id:          commentId,
