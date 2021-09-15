@@ -15,4 +15,5 @@ type Comment struct {
 type CommentRepository interface {
 	Save(*Comment) error
 	FindAll(postId string) ([]Comment, error)
+	GetCommentNotificationMessage(string, string) ([]byte, error)
 }

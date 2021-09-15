@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 
 	"github.com/danilomarques1/findmypetapi/model"
@@ -9,6 +10,15 @@ import (
 
 type CommentRepositorySql struct {
 	db *sql.DB
+}
+
+// Move somewhere else
+type Message struct {
+	PostId             string `json:"post_id"`
+	PostAuthorEmail    string `json:"post_author_email"`
+	PostAuthorName     string `json:"post_author_name"`
+	CommentAuthorEmail string `json:"comment_author_email"`
+	CommentAuthorName  string `json:"comment_author_name"`
 }
 
 func NewCommentRepositorySql(db *sql.DB) *CommentRepositorySql {
@@ -72,4 +82,42 @@ func (cr *CommentRepositorySql) FindAll(postId string) ([]model.Comment, error) 
 	}
 
 	return comments, nil
+}
+
+func (cr *CommentRepositorySql) GetCommentNotificationMessage(postId, commentId string) ([]byte, error) {
+	stmt, err := cr.db.Prepare(`
+		select pu.email, pu.name, cou.email, cou.name
+		from comment as c
+		join post as p on c.post_id = p.id
+		join userpet as cou on c.author_id = cou.id
+		join userpet as pu on p.author_id = pu.id
+		where c.id = $1
+	`)
+	if err != nil {
+		log.Printf("Error statement %v\n", err)
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var msg Message
+	err = stmt.QueryRow(commentId).Scan(&msg.PostAuthorEmail,
+		&msg.PostAuthorName, &msg.CommentAuthorEmail,
+		&msg.CommentAuthorName)
+	msg.PostId = postId
+	if err != nil {
+		log.Printf("Error querying %v\n", err)
+		return nil, err
+	}
+	if msg.PostAuthorEmail == msg.CommentAuthorEmail {
+		return []byte(""), nil
+	}
+
+	mBytes, err := json.Marshal(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("%v\n", string(mBytes))
+
+	return mBytes, nil
 }

@@ -58,7 +58,7 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	if err != nil {
 		log.Fatalf("Error connecting to rabbit mq %v\n", err)
 	}
-	producer, err := lib.NewAmqpProducer(connection, app.DB)
+	producer, err := lib.NewAmqpProducer(connection)
 	if err != nil {
 		log.Fatalf("Error setting up producer %v\n", err)
 	}

@@ -16,7 +16,7 @@ import (
 type ProducerMock struct {
 }
 
-func (p *ProducerMock) Publish(key1, key2 string) error {
+func (p *ProducerMock) Publish(msg []byte) error {
 	log.Printf("Publishing message...\n")
 
 	return nil
@@ -138,7 +138,7 @@ func TestCreateComment(t *testing.T) {
 	assertNil(t, err)
 
 	// comment will be created using a different user
-	token, _, err := util.NewToken(MOCK_USER_ID)
+	token, _, err := util.NewToken(MOCK_USER_ID2)
 	assertNil(t, err)
 	body := `{"comment_text": "This is a very cool comment"}`
 	request, err := http.NewRequest(http.MethodPost,

@@ -3,7 +3,6 @@ version: '3.0'
 services:
   db:
     image: postgres:latest
-    container_name: fitz-postgres
     ports:
       - 5432:5432
     environment:
@@ -12,7 +11,6 @@ services:
       POSTGRES_DB: findmypet
   rabbit:
     image: rabbitmq:3-management
-    container_name: fitz-rabbit
     ports:
       - 15672:15672
       - 5672:5672

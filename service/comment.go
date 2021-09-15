@@ -39,11 +39,17 @@ func (cs *CommentService) Save(userId, postId string,
 	response := dto.CreateCommentResponseDto{
 		Comment: comment,
 	}
-	err = cs.producer.Publish(postId, commentId)
-	if err != nil {
-		// TODO how to handle errors
-		log.Printf("Error publishing message %v\n", err)
-	}
+
+	go func() {
+		msg, err := cs.commentRepository.GetCommentNotificationMessage(postId, commentId)
+		if err == nil && len(msg) != 0 {
+			err = cs.producer.Publish(msg)
+			if err != nil {
+				// TODO how to handle errors
+				log.Printf("Error publishing message %v\n", err)
+			}
+		}
+	}()
 
 	return &response, nil
 }
