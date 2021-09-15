@@ -99,6 +99,13 @@ func (p *AmqpProducer) Publish(postId, commentId string) error {
 		log.Printf("Error generating message %v\n", err)
 		return err
 	}
+
+	// no reason to generate a message if who commented
+	// was the post author
+	// TODO test it out
+	if len(msg) == 0 {
+		return nil
+	}
 	err = channel.Publish("", NOTIFICATION_QUEUE, false,
 		false, amqp.Publishing{
 			ContentType: "application/json",
@@ -136,11 +143,14 @@ func (p *AmqpProducer) getMessage(postId, commentId string) ([]byte, error) {
 		log.Printf("Error querying %v\n", err)
 		return nil, err
 	}
+	if msg.PostAuthorEmail == msg.CommentAuthorEmail {
+		return []byte(""), nil
+	}
+
 	mBytes, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Message %v\n", string(mBytes))
 
 	return mBytes, nil
 }

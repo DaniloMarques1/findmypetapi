@@ -105,14 +105,23 @@ func TestSaveCommentService(t *testing.T) {
 
 func TestCreateComment(t *testing.T) {
 	cleanTables()
-	user := model.User{
+	// post owner
+	postOwner := model.User{
 		Id:    MOCK_USER_ID,
 		Name:  MOCK_USER_NAME,
 		Email: MOCK_USER_EMAIL,
 	}
 
+	commentOwner := model.User{
+		Id:    MOCK_USER_ID2,
+		Name:  MOCK_USER_NAME2,
+		Email: MOCK_USER_EMAIL2,
+	}
+
 	uR := repository.NewUserRepositorySql(App.DB)
-	err := uR.Save(&user)
+	err := uR.Save(&postOwner)
+	assertNil(t, err)
+	err = uR.Save(&commentOwner)
 	assertNil(t, err)
 
 	post := model.Post{
@@ -128,6 +137,7 @@ func TestCreateComment(t *testing.T) {
 	err = pRepo.Save(&post)
 	assertNil(t, err)
 
+	// comment will be created using a different user
 	token, _, err := util.NewToken(MOCK_USER_ID)
 	assertNil(t, err)
 	body := `{"comment_text": "This is a very cool comment"}`
