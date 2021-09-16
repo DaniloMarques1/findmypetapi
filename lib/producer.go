@@ -77,7 +77,6 @@ func (p *AmqpProducer) declareQueue(channel *amqp.Channel) error {
 		return err
 	}
 
-	log.Printf("Para criar o %v\n", STATUS_CHANGE_QUEUE)
 	_, err = channel.QueueDeclare(STATUS_CHANGE_QUEUE, true, false, false, false, nil)
 	if err != nil {
 		log.Printf("Error declaring queue %v %v\n", STATUS_CHANGE_QUEUE, err)
