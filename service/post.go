@@ -1,10 +1,12 @@
 package service
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/danilomarques1/findmypetapi/dto"
+	"github.com/danilomarques1/findmypetapi/lib"
 	"github.com/danilomarques1/findmypetapi/model"
 	"github.com/danilomarques1/findmypetapi/util"
 	"github.com/google/uuid"
@@ -12,11 +14,13 @@ import (
 
 type PostService struct {
 	postRepository model.PostRepository
+	producer       lib.Producer
 }
 
-func NewPostService(postRepository model.PostRepository) *PostService {
+func NewPostService(postRepository model.PostRepository, producer lib.Producer) *PostService {
 	return &PostService{
 		postRepository: postRepository,
+		producer:       producer,
 	}
 }
 
@@ -63,16 +67,27 @@ func (ps *PostService) FindById(id string) (*dto.GetPostResponseDto, error) {
 }
 
 func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, authorId, postId string) error {
-	_, err := ps.postRepository.FindPostByAuthor(authorId, postId)
+	post, err := ps.postRepository.FindPostByAuthor(authorId, postId)
 	if err != nil {
 		log.Printf("No posts were found for this user")
 		return util.NewApiError("Post not found", http.StatusNotFound)
 	}
 
-	post, err := ps.postRepository.FindById(postId)
-	if err != nil {
-		return err
-	}
+	go func() {
+		if post.Status != updateDto.Status && updateDto.Status == "found" {
+			msg := dto.StatusChangeNotification{PostId: postId}
+			mBytes, err := json.Marshal(&msg)
+			log.Printf("Marshal message %v\n", err)
+			if err == nil {
+				log.Printf("Message %v\n", string(mBytes))
+				err = ps.producer.Publish(mBytes, lib.STATUS_CHANGE_QUEUE)
+				if err != nil {
+					log.Printf("Error publishing %v\n", err)
+				}
+			}
+		}
+	}()
+
 	post.Title = updateDto.Title
 	post.Description = updateDto.Description
 	post.Status = updateDto.Status

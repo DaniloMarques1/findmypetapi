@@ -5,20 +5,12 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/model"
 )
 
 type CommentRepositorySql struct {
 	db *sql.DB
-}
-
-// Move somewhere else
-type Message struct {
-	PostId             string `json:"post_id"`
-	PostAuthorEmail    string `json:"post_author_email"`
-	PostAuthorName     string `json:"post_author_name"`
-	CommentAuthorEmail string `json:"comment_author_email"`
-	CommentAuthorName  string `json:"comment_author_name"`
 }
 
 func NewCommentRepositorySql(db *sql.DB) *CommentRepositorySql {
@@ -99,7 +91,7 @@ func (cr *CommentRepositorySql) GetCommentNotificationMessage(postId, commentId 
 	}
 	defer stmt.Close()
 
-	var msg Message
+	var msg dto.CommentNotification
 	err = stmt.QueryRow(commentId).Scan(&msg.PostAuthorEmail,
 		&msg.PostAuthorName, &msg.CommentAuthorEmail,
 		&msg.CommentAuthorName)

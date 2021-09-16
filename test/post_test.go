@@ -53,7 +53,7 @@ func TestCreatePostService(t *testing.T) {
 	assertNil(t, err)
 
 	postRepository := repository.NewPostRepositorySql(App.DB)
-	postService := service.NewPostService(postRepository)
+	postService := service.NewPostService(postRepository, &ProducerMock{})
 	postDto := dto.CreatePostRequestDto{
 		Title:       "Post title",
 		Description: "Post description",
@@ -184,7 +184,7 @@ func TestGetAllPostsService(t *testing.T) {
 	err = postRepository.Save(&post3)
 	assertNil(t, err)
 
-	postService := service.NewPostService(postRepository)
+	postService := service.NewPostService(postRepository, &ProducerMock{})
 	response, err := postService.GetAll()
 	assertNil(t, err)
 	assertEqual(t, 3, len(response.Posts))
@@ -291,7 +291,7 @@ func TestFindByIdService(t *testing.T) {
 	err = pRepo.Save(&postToBeCreated)
 	assertNil(t, err)
 
-	pService := service.NewPostService(pRepo)
+	pService := service.NewPostService(pRepo, &ProducerMock{})
 	response, err := pService.FindById(MOCK_POST1_ID)
 	assertNil(t, err)
 	assertEqual(t, MOCK_USER_ID, response.Post.AuthorId)
@@ -394,7 +394,7 @@ func TestUpdatePostService(t *testing.T) {
 	pr.Save(&post)
 	assertNil(t, err)
 
-	pservice := service.NewPostService(pr)
+	pservice := service.NewPostService(pr, &ProducerMock{})
 	updateDto := dto.UpdatePostRequestDto{
 		Title:       "New post title",
 		Description: "New description title",
@@ -421,6 +421,7 @@ func TestUpdatePost(t *testing.T) {
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
 	}
+
 	ur := repository.NewUserRepositorySql(App.DB)
 	pr := repository.NewPostRepositorySql(App.DB)
 	err := ur.Save(&user)
@@ -432,7 +433,7 @@ func TestUpdatePost(t *testing.T) {
 		{
 			"title": "New post title",
 			"description": "New description",
-			"status": "missing"
+			"status": "found"
 		}
 	`
 	token, _, err := util.NewToken(MOCK_USER_ID)

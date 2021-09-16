@@ -9,12 +9,12 @@ import (
 const (
 	NOTIFICATION_EXCHANGE = "NOTIFICATION_EXCHANGE"
 	COMMENT_QUEUE         = "COMMENT_QUEUE"
-	//STATUS_CHANGE_QUEUE = "COMMENT_QUEUE" // TODO
+	STATUS_CHANGE_QUEUE   = "STATUS_CHANGE_QUEUE"
 )
 
 type Producer interface {
 	Setup() error
-	Publish(msg []byte) error // TODO how to handle errors
+	Publish(msg []byte, queueName string) error // TODO how to handle errors
 }
 
 type AmqpProducer struct {
@@ -52,6 +52,7 @@ func (p *AmqpProducer) Setup() error {
 
 	err = p.declareQueue(channel)
 	if err != nil {
+		log.Printf("Error declaring queue %v\n")
 		return err
 	}
 
@@ -72,14 +73,21 @@ func (p *AmqpProducer) declareExchange(channel *amqp.Channel) error {
 func (p *AmqpProducer) declareQueue(channel *amqp.Channel) error {
 	_, err := channel.QueueDeclare(COMMENT_QUEUE, true, false, false, false, nil)
 	if err != nil {
-		log.Printf("Error declaring queue %v\n", err)
+		log.Printf("Error declaring queue %v %v\n", COMMENT_QUEUE, err)
+		return err
+	}
+
+	log.Printf("Para criar o %v\n", STATUS_CHANGE_QUEUE)
+	_, err = channel.QueueDeclare(STATUS_CHANGE_QUEUE, true, false, false, false, nil)
+	if err != nil {
+		log.Printf("Error declaring queue %v %v\n", STATUS_CHANGE_QUEUE, err)
 		return err
 	}
 
 	return nil
 }
 
-func (p *AmqpProducer) Publish(msg []byte) error {
+func (p *AmqpProducer) Publish(msg []byte, queueName string) error {
 	channel, err := p.connection.Channel()
 	if err != nil {
 		log.Printf("Error getting channel %v\n", err)
@@ -87,11 +95,10 @@ func (p *AmqpProducer) Publish(msg []byte) error {
 	}
 	defer channel.Close()
 
-	err = channel.Publish("", COMMENT_QUEUE, false,
-		false, amqp.Publishing{
-			ContentType: "application/json",
-			Body:        msg,
-		})
+	err = channel.Publish("", queueName, false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        msg,
+	})
 	if err != nil {
 		log.Printf("Error publishing message %v\n", err)
 		return err

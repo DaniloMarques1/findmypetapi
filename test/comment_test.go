@@ -16,7 +16,7 @@ import (
 type ProducerMock struct {
 }
 
-func (p *ProducerMock) Publish(msg []byte) error {
+func (p *ProducerMock) Publish(msg []byte, queueName string) error {
 	log.Printf("Publishing message...\n")
 
 	return nil

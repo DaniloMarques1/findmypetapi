@@ -49,11 +49,6 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService, app.validator)
 
-	postRepo := repository.NewPostRepositorySql(app.DB)
-	postService := service.NewPostService(postRepo)
-	postHandler := handler.NewPostHandler(postService, app.validator)
-
-	commentRepo := repository.NewCommentRepositorySql(app.DB)
 	connection, err := amqp.Dial(os.Getenv("RABBIT_URL"))
 	if err != nil {
 		log.Fatalf("Error connecting to rabbit mq %v\n", err)
@@ -62,6 +57,12 @@ func (app *App) Init(sqlFileName, dbstring string) {
 	if err != nil {
 		log.Fatalf("Error setting up producer %v\n", err)
 	}
+
+	postRepo := repository.NewPostRepositorySql(app.DB)
+	postService := service.NewPostService(postRepo, producer)
+	postHandler := handler.NewPostHandler(postService, app.validator)
+
+	commentRepo := repository.NewCommentRepositorySql(app.DB)
 	commentService := service.NewCommentService(commentRepo, producer)
 	commentHandler := handler.NewCommentHandler(commentService, app.validator)
 
