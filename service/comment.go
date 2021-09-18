@@ -39,16 +39,14 @@ func (cs *CommentService) Save(userId, postId string,
 		Comment: comment,
 	}
 
-	go func() {
-		msg, err := cs.commentRepository.GetCommentNotificationMessage(postId, commentId)
-		if err == nil && len(msg) != 0 {
-			err = cs.producer.Publish(msg, lib.COMMENT_QUEUE)
-			if err != nil {
-				// TODO how to handle errors
-				log.Printf("Error publishing message %v\n", err)
-			}
+	msg, err := cs.commentRepository.GetCommentNotificationMessage(postId, commentId)
+	if err == nil && len(msg) != 0 {
+		err = cs.producer.Publish(msg, lib.COMMENT_QUEUE)
+		if err != nil {
+			// TODO how to handle errors
+			log.Printf("Error publishing message %v\n", err)
 		}
-	}()
+	}
 
 	return &response, nil
 }

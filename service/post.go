@@ -73,20 +73,19 @@ func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, authorId, post
 		return util.NewApiError("Post not found", http.StatusNotFound)
 	}
 
-	go func() {
-		if post.Status != updateDto.Status && updateDto.Status == "found" {
-			msg := dto.StatusChangeNotification{PostId: postId}
-			mBytes, err := json.Marshal(&msg)
-			log.Printf("Marshal message %v\n", err)
-			if err == nil {
-				log.Printf("Message %v\n", string(mBytes))
-				err = ps.producer.Publish(mBytes, lib.STATUS_CHANGE_QUEUE)
-				if err != nil {
-					log.Printf("Error publishing %v\n", err)
-				}
+	log.Printf("%v\n", updateDto)
+	if post.Status != updateDto.Status && updateDto.Status == "found" {
+		msg := dto.StatusChangeNotification{PostId: postId}
+		mBytes, err := json.Marshal(&msg)
+		log.Printf("Marshal message %v\n", err)
+		if err == nil {
+			log.Printf("Message %v\n", string(mBytes))
+			err = ps.producer.Publish(mBytes, lib.STATUS_CHANGE_QUEUE)
+			if err != nil {
+				log.Printf("Error publishing %v\n", err)
 			}
 		}
-	}()
+	}
 
 	post.Title = updateDto.Title
 	post.Description = updateDto.Description
