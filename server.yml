@@ -123,7 +123,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreatePostRequest'
       responses:
@@ -418,6 +418,13 @@ components:
         description:
           type: string
           maxLength: 800
+        file:
+          type: string
+          format: binary
+      required:
+        - title
+        - description
+        - file
     CreatePostResponse:
       type: object
       properties:
