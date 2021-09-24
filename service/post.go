@@ -97,3 +97,16 @@ func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, authorId, post
 
 	return nil
 }
+
+func (ps *PostService) FindPostsByAuthor(authorId string) (*dto.GetPostsResponseDto, error) {
+	posts, err := ps.postRepository.FindPostsByAuthor(authorId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.GetPostsResponseDto{
+		Posts: posts,
+	}
+
+	return &response, nil
+}

@@ -96,3 +96,14 @@ func (ph *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusNoContent, nil)
 }
+
+func (ph *PostHandler) FindPostsByAuthor(w http.ResponseWriter, r *http.Request) {
+	userId := r.Header.Get("user_id")
+	response, err := ph.postService.FindPostsByAuthor(userId)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, response)
+}

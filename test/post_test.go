@@ -477,3 +477,136 @@ func TestFindByAuthorRepository(t *testing.T) {
 	assertEqual(t, "Post title 1", fpost.Title)
 	assertEqual(t, MOCK_USER_ID, fpost.AuthorId)
 }
+
+func TestFindPostsByAuthorRepository(t *testing.T) {
+	cleanTables()
+	user1 := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+	user2 := model.User{
+		Id:    MOCK_USER_ID2,
+		Name:  MOCK_USER_NAME2,
+		Email: MOCK_USER_EMAIL2,
+	}
+
+	post1 := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	post2 := model.Post{
+		Id:          MOCK_POST2_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 2",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+
+	err := ur.Save(&user1)
+	assertNil(t, err)
+	err = ur.Save(&user2)
+	assertNil(t, err)
+	pr.Save(&post1)
+	assertNil(t, err)
+	pr.Save(&post2)
+	assertNil(t, err)
+
+	posts, err := pr.FindPostsByAuthor(MOCK_USER_ID)
+	assertNil(t, err)
+	assertEqual(t, len(posts), 2)
+
+	posts, err = pr.FindPostsByAuthor(MOCK_USER_ID2)
+	assertNil(t, err)
+	assertEqual(t, len(posts), 0)
+}
+
+func TestFindPostsByAuthorService(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+
+	post1 := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	post2 := model.Post{
+		Id:          MOCK_POST2_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 2",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+
+	err := ur.Save(&user)
+	assertNil(t, err)
+	pr.Save(&post1)
+	assertNil(t, err)
+	pr.Save(&post2)
+	assertNil(t, err)
+
+	service := service.NewPostService(pr, nil)
+	response, err := service.FindPostsByAuthor(MOCK_USER_ID)
+	assertNil(t, err)
+	assertEqual(t, len(response.Posts), 2)
+}
+
+func TestFindPostsByAuthor(t *testing.T) {
+	cleanTables()
+	user := model.User{
+		Id:    MOCK_USER_ID,
+		Name:  MOCK_USER_NAME,
+		Email: MOCK_USER_EMAIL,
+	}
+
+	post1 := model.Post{
+		Id:          MOCK_POST1_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 1",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	post2 := model.Post{
+		Id:          MOCK_POST2_ID,
+		AuthorId:    MOCK_USER_ID,
+		Title:       "Post title 2",
+		Description: "Post description",
+		ImageUrl:    "/path/to/file",
+	}
+
+	ur := repository.NewUserRepositorySql(App.DB)
+	pr := repository.NewPostRepositorySql(App.DB)
+
+	err := ur.Save(&user)
+	assertNil(t, err)
+	pr.Save(&post1)
+	assertNil(t, err)
+	pr.Save(&post2)
+	assertNil(t, err)
+
+	token, _, _ := util.NewToken(MOCK_USER_ID)
+	request, err := http.NewRequest(http.MethodGet, "/post/user", nil)
+	assertNil(t, err)
+	request.Header.Add("Authorization", "Bearer "+token)
+
+	response := executeRequest(request)
+	assertEqual(t, http.StatusOK, response.Code)
+}
