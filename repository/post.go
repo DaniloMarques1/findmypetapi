@@ -138,3 +138,35 @@ func (pr *PostRepositorySql) FindAll() ([]model.Post, error) {
 
 	return posts, nil
 }
+
+func (pr *PostRepositorySql) FindPostsByAuthor(authorId string) ([]model.Post, error) {
+	stmt, err := pr.db.Prepare(`
+		select id, author_id, title, description, image_url, status, created_at
+		from post
+		where author_id = $1
+		order by created_at desc
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(authorId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	posts := make([]model.Post, 0)
+	for rows.Next() {
+		var post model.Post
+		err := rows.Scan(&post.Id, &post.AuthorId, &post.Title, &post.Description, &post.ImageUrl,
+			&post.Status, &post.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
