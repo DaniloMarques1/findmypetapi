@@ -1,10 +1,15 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/lib"
 	"github.com/danilomarques1/findmypetapi/model"
@@ -24,17 +29,29 @@ func NewPostService(postRepository model.PostRepository, producer lib.Producer) 
 	}
 }
 
+const (
+	BUCKET_NAME = "findmypetbucket"
+	BUCKET_URL  = "https://storage.cloud.google.com/findmypetbucket/"
+)
+
 func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto,
 	userId string) (*dto.CreatePostResponseDto, error) {
+	path, err := ps.uploadFile(postDto.Filename, postDto.File)
+	if err != nil {
+		log.Printf("Error uploading file %v\n", err)
+		return nil, err
+	}
+
 	postId := uuid.NewString()
 	post := model.Post{
 		Id:          postId,
 		AuthorId:    userId,
 		Title:       postDto.Title,
 		Description: postDto.Description,
-		ImageUrl:    "/path/to/image",
+		ImageUrl:    path,
 	}
-	err := ps.postRepository.Save(&post)
+
+	err = ps.postRepository.Save(&post)
 	if err != nil {
 		return nil, err
 	}
@@ -96,4 +113,29 @@ func (ps *PostService) Update(updateDto dto.UpdatePostRequestDto, authorId, post
 	}
 
 	return nil
+}
+
+func (ps *PostService) uploadFile(fileName string, file multipart.File) (string, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	bucket := client.Bucket(BUCKET_NAME)
+	object := bucket.Object(fileName)
+
+	wc := object.NewWriter(ctx)
+	if _, err := io.Copy(wc, file); err != nil {
+		return "", err
+	}
+	if err := wc.Close(); err != nil {
+		return "", err
+	}
+
+	return BUCKET_URL + fileName, nil
 }
