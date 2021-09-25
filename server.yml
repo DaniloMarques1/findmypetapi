@@ -502,7 +502,24 @@ components:
         comments:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
+            $ref: '#/components/schemas/GetComment'
+    GetComment:
+      type: object
+      properties:
+        author:
+          $ref: '#/components/schemas/CommentAuthor'
+        comment_text:
+          type: string
+        created_at:
+          type: string
+          format: date
+    CommentAuthor:
+      type: object
+      properties:
+        author_name:
+          type: string
+        author_email:
+          type: string
     Error:
       type: object
       properties:
