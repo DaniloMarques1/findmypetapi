@@ -1,10 +1,16 @@
 package dto
 
-import "github.com/danilomarques1/findmypetapi/model"
+import (
+	"mime/multipart"
+
+	"github.com/danilomarques1/findmypetapi/model"
+)
 
 type CreatePostRequestDto struct {
-	Title       string `json:"title" validate:"max=120"`
-	Description string `json:"description" validate:"max=800"`
+	Title       string         `json:"title" validate:"max=120,required"`
+	Description string         `json:"description" validate:"max=800"`
+	File        multipart.File `json:"file" validate:"required"`
+	Filename    string         `json:"file_name" validate:"required"`
 }
 
 type CreatePostResponseDto struct {
