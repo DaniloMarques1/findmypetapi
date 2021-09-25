@@ -36,7 +36,13 @@ func (cs *CommentService) Save(userId, postId string,
 		return nil, err
 	}
 	response := dto.CreateCommentResponseDto{
-		Comment: comment,
+		Comment: dto.CommentDto{
+			Id:          comment.Id,
+			CreatedAt:   comment.CreatedAt,
+			AuthorId:    comment.AuthorId,
+			PostId:      comment.PostId,
+			CommentText: comment.CommentText,
+		},
 	}
 
 	msg, err := cs.commentRepository.GetCommentNotificationMessage(postId, commentId)
@@ -56,7 +62,10 @@ func (cs *CommentService) FindAll(postId string) (*dto.GetCommentsResponseDto, e
 	if err != nil {
 		return nil, err
 	}
-	response := dto.GetCommentsResponseDto{Comments: comments}
+
+	response := dto.GetCommentsResponseDto{
+		Comments: comments,
+	}
 
 	return &response, nil
 }

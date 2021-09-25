@@ -40,12 +40,14 @@ func (cr *CommentRepositorySql) Save(comment *model.Comment) error {
 	return nil
 }
 
-func (cr *CommentRepositorySql) FindAll(postId string) ([]model.Comment, error) {
+func (cr *CommentRepositorySql) FindAll(postId string) ([]model.GetCommentDto, error) {
 	// TODO find a way to verify if post exist first
 	stmt, err := cr.db.Prepare(`
-		select id, author_id, post_id, comment_text, created_at
-		from comment
+		select c.id, c.post_id, c.comment_text, c.created_at, author.name, author.email
+		from comment as c
+		join userpet as author on c.author_id = author.id
 		where post_id = $1
+		order by created_at desc;
 	`)
 	if err != nil {
 		log.Printf("Error scanning %v\n", err)
@@ -53,7 +55,7 @@ func (cr *CommentRepositorySql) FindAll(postId string) ([]model.Comment, error) 
 	}
 	defer stmt.Close()
 
-	comments := make([]model.Comment, 0)
+	comments := make([]model.GetCommentDto, 0)
 	rows, err := stmt.Query(postId)
 	if err != nil {
 		log.Printf("Error scanning %v\n", err)
@@ -62,10 +64,11 @@ func (cr *CommentRepositorySql) FindAll(postId string) ([]model.Comment, error) 
 	defer rows.Close()
 
 	for rows.Next() {
-		log.Printf("Reading a new line...\n")
-		var comment model.Comment
-		err = rows.Scan(&comment.Id, &comment.AuthorId, &comment.PostId,
-			&comment.CommentText, &comment.CreatedAt)
+		var comment model.GetCommentDto
+		var author model.AuthorDto
+		err = rows.Scan(&comment.Id, &comment.PostId, &comment.CommentText, &comment.CreatedAt,
+			&author.AuthorName, &author.AuthorEmail)
+		comment.Author = author
 		if err != nil {
 			log.Printf("Error scanning %v\n", err)
 			return nil, err
