@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/danilomarques1/findmypetapi/dto"
 	"github.com/danilomarques1/findmypetapi/service"
@@ -24,20 +26,31 @@ func NewPostHandler(postService *service.PostService, validator *validator.Valid
 	}
 }
 
+const MAX_BYTES_SIZE_POST_CREATION = 10000
+
 func (ph *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var postDto dto.CreatePostRequestDto
-	if err := json.NewDecoder(r.Body).Decode(&postDto); err != nil {
-		log.Printf("Invalid body %v\n", err)
-		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{Message: "Invalid body"})
+	r.ParseMultipartForm(MAX_BYTES_SIZE_POST_CREATION)
+
+	postDto.Title = r.FormValue("title")
+	postDto.Description = r.FormValue("description")
+
+	file, fileHandler, err := r.FormFile("file")
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{Message: "The given file is invalid"})
 		return
 	}
+	defer file.Close()
+
+	postDto.File = file
+	postDto.Filename = fmt.Sprintf("%v-%v", time.Now().Unix(), fileHandler.Filename)
 	if err := ph.validator.Struct(postDto); err != nil {
 		log.Printf("Invalid body %v\n", err)
 		util.RespondJson(w, http.StatusBadRequest, dto.ErrorDto{Message: "Invalid body"})
 		return
 	}
-	userId := r.Header.Get("user_id")
 
+	userId := r.Header.Get("user_id")
 	response, err := ph.postService.CreatePost(postDto, userId)
 	if err != nil {
 		log.Printf("Error creating post %v\n", err)
