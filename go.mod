@@ -4,6 +4,7 @@ module github.com/danilomarques1/findmypetapi
 go 1.16
 
 require (
+	cloud.google.com/go/storage v1.16.1 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.3.0 // indirect
