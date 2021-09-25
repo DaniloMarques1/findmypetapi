@@ -31,7 +31,7 @@ func NewPostService(postRepository model.PostRepository, producer lib.Producer) 
 
 const (
 	BUCKET_NAME = "findmypetbucket"
-	BUCKET_URL  = "https://storage.cloud.google.com/findmypetbucket/"
+	BUCKET_URL  = "https://storage.googleapis.com/findmypetbucket/"
 )
 
 func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto,
