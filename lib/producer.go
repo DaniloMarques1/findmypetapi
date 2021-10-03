@@ -52,7 +52,7 @@ func (p *AmqpProducer) Setup() error {
 
 	err = p.declareQueue(channel)
 	if err != nil {
-		log.Printf("Error declaring queue %v\n")
+		log.Printf("Error declaring queue %v\n", err)
 		return err
 	}
 
