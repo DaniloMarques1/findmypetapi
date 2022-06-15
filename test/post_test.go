@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -26,10 +27,11 @@ func TestSavePostRepository(t *testing.T) {
 	err := userRepository.Save(&user)
 	assertNil(t, err)
 
+	author := model.User{Id: user.Id}
 	postRepository := repository.NewPostRepositorySql(App.DB)
 	post := model.Post{
 		Id:          "123e4567-e89b-12d3-a456-426614174000",
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post title",
 		Description: "description",
 		ImageUrl:    "some/path/to/file",
@@ -39,6 +41,7 @@ func TestSavePostRepository(t *testing.T) {
 
 	err = postRepository.Save(&post)
 	assertNil(t, err)
+	log.Printf("%#v\n", post.Author)
 }
 
 func TestCreatePostService(t *testing.T) {
@@ -62,7 +65,7 @@ func TestCreatePostService(t *testing.T) {
 	response, err := postService.CreatePost(postDto, MOCK_USER_ID)
 	assertNil(t, err)
 	assertEqual(t, "Post title", response.Post.Title)
-	assertEqual(t, MOCK_USER_ID, response.Post.AuthorId)
+	assertEqual(t, MOCK_USER_ID, response.Post.Author.Id)
 	assertNotEqual(t, "", response.Post.CreatedAt)
 }
 
@@ -96,7 +99,7 @@ func TestCreatePost(t *testing.T) {
 	var dto dto.CreatePostResponseDto
 	err = json.NewDecoder(response.Body).Decode(&dto)
 	assertNil(t, err)
-	assertEqual(t, MOCK_USER_ID, dto.Post.AuthorId)
+	assertEqual(t, MOCK_USER_ID, dto.Post.Author.Id)
 	assertEqual(t, "missing", dto.Post.Status)
 }
 
@@ -110,7 +113,7 @@ func TestFindAllRepository(t *testing.T) {
 	postRepository := repository.NewPostRepositorySql(App.DB)
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 1",
 		Description: "Desc 1",
 		ImageUrl:    "/path/to/image",
@@ -120,7 +123,7 @@ func TestFindAllRepository(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 2",
 		Description: "Desc 2",
 		ImageUrl:    "/path/to/image",
@@ -130,7 +133,7 @@ func TestFindAllRepository(t *testing.T) {
 
 	post3 := model.Post{
 		Id:          MOCK_POST3_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 3",
 		Description: "Desc 3",
 		ImageUrl:    "/path/to/image",
@@ -156,7 +159,7 @@ func TestGetAllPostsService(t *testing.T) {
 	postRepository := repository.NewPostRepositorySql(App.DB)
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 1",
 		Description: "Desc 1",
 		ImageUrl:    "/path/to/image",
@@ -166,7 +169,7 @@ func TestGetAllPostsService(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 2",
 		Description: "Desc 2",
 		ImageUrl:    "/path/to/image",
@@ -176,7 +179,7 @@ func TestGetAllPostsService(t *testing.T) {
 
 	post3 := model.Post{
 		Id:          MOCK_POST3_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post 3",
 		Description: "Desc 3",
 		ImageUrl:    "/path/to/image",
@@ -193,14 +196,14 @@ func TestGetAllPostsService(t *testing.T) {
 func TestGetAll(t *testing.T) {
 	cleanTables()
 	userRepository := repository.NewUserRepositorySql(App.DB)
-	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
-	err := userRepository.Save(&user)
+	author := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
+	err := userRepository.Save(&author)
 	assertNil(t, err)
 
 	postRepository := repository.NewPostRepositorySql(App.DB)
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post 1",
 		Description: "Desc 1",
 		ImageUrl:    "/path/to/image",
@@ -210,7 +213,7 @@ func TestGetAll(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post 2",
 		Description: "Desc 2",
 		ImageUrl:    "/path/to/image",
@@ -220,7 +223,7 @@ func TestGetAll(t *testing.T) {
 
 	post3 := model.Post{
 		Id:          MOCK_POST3_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post 3",
 		Description: "Desc 3",
 		ImageUrl:    "/path/to/image",
@@ -245,10 +248,10 @@ func TestGetAll(t *testing.T) {
 
 func TestFindByIdRepository(t *testing.T) {
 	cleanTables()
-	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
+	author := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
 	postToBeCreated := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post title",
 		Description: "Post Description",
 		ImageUrl:    "/path/to/image",
@@ -258,7 +261,7 @@ func TestFindByIdRepository(t *testing.T) {
 	pRepo := repository.NewPostRepositorySql(App.DB)
 	uRepo := repository.NewUserRepositorySql(App.DB)
 
-	err := uRepo.Save(&user)
+	err := uRepo.Save(&author)
 	assertNil(t, err)
 
 	err = pRepo.Save(&postToBeCreated)
@@ -268,7 +271,7 @@ func TestFindByIdRepository(t *testing.T) {
 	assertNil(t, err)
 	assertNotNil(t, foundP)
 	assertEqual(t, foundP.Title, "Post title")
-	assertEqual(t, foundP.AuthorId, MOCK_USER_ID)
+	assertEqual(t, foundP.Author.Id, MOCK_USER_ID)
 }
 
 func TestFindByIdService(t *testing.T) {
@@ -276,7 +279,7 @@ func TestFindByIdService(t *testing.T) {
 	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
 	postToBeCreated := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post title",
 		Description: "Post Description",
 		ImageUrl:    "/path/to/image",
@@ -294,7 +297,7 @@ func TestFindByIdService(t *testing.T) {
 	pService := service.NewPostService(pRepo, &ProducerMock{})
 	response, err := pService.FindById(MOCK_POST1_ID)
 	assertNil(t, err)
-	assertEqual(t, MOCK_USER_ID, response.Post.AuthorId)
+	assertEqual(t, MOCK_USER_ID, response.Post.Author.Id)
 	assertEqual(t, MOCK_POST1_ID, response.Post.Id)
 }
 
@@ -303,7 +306,7 @@ func TestGetOne(t *testing.T) {
 	user := model.User{Id: MOCK_USER_ID, Name: "Fitz", Email: "fitz@gmail.com"}
 	postToBeCreated := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post title",
 		Description: "Post Description",
 		ImageUrl:    "/path/to/image",
@@ -335,7 +338,7 @@ func TestUpdatePostRepository(t *testing.T) {
 	}
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -343,7 +346,7 @@ func TestUpdatePostRepository(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &user,
 		Title:       "Post title 2",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -374,14 +377,14 @@ func TestUpdatePostRepository(t *testing.T) {
 
 func TestUpdatePostService(t *testing.T) {
 	cleanTables()
-	user := model.User{
+	author := model.User{
 		Id:    MOCK_USER_ID,
 		Name:  MOCK_USER_NAME,
 		Email: MOCK_USER_EMAIL,
 	}
 	post := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -389,7 +392,7 @@ func TestUpdatePostService(t *testing.T) {
 	ur := repository.NewUserRepositorySql(App.DB)
 	pr := repository.NewPostRepositorySql(App.DB)
 
-	err := ur.Save(&user)
+	err := ur.Save(&author)
 	assertNil(t, err)
 	pr.Save(&post)
 	assertNil(t, err)
@@ -409,14 +412,14 @@ func TestUpdatePostService(t *testing.T) {
 
 func TestUpdatePost(t *testing.T) {
 	cleanTables()
-	user := model.User{
+	author := model.User{
 		Id:    MOCK_USER_ID,
 		Name:  MOCK_USER_NAME,
 		Email: MOCK_USER_EMAIL,
 	}
 	post := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -424,7 +427,7 @@ func TestUpdatePost(t *testing.T) {
 
 	ur := repository.NewUserRepositorySql(App.DB)
 	pr := repository.NewPostRepositorySql(App.DB)
-	err := ur.Save(&user)
+	err := ur.Save(&author)
 	assertNil(t, err)
 	pr.Save(&post)
 	assertNil(t, err)
@@ -453,21 +456,22 @@ func TestUpdatePost(t *testing.T) {
 
 func TestFindByAuthorRepository(t *testing.T) {
 	cleanTables()
-	user := model.User{
+	author := model.User{
 		Id:    MOCK_USER_ID,
 		Name:  MOCK_USER_NAME,
 		Email: MOCK_USER_EMAIL,
 	}
+
 	post := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
 	}
 	ur := repository.NewUserRepositorySql(App.DB)
 	pr := repository.NewPostRepositorySql(App.DB)
-	err := ur.Save(&user)
+	err := ur.Save(&author)
 	assertNil(t, err)
 	pr.Save(&post)
 	assertNil(t, err)
@@ -475,17 +479,17 @@ func TestFindByAuthorRepository(t *testing.T) {
 	fpost, err := pr.FindPostByAuthor(MOCK_USER_ID, MOCK_POST1_ID)
 	assertNil(t, err)
 	assertEqual(t, "Post title 1", fpost.Title)
-	assertEqual(t, MOCK_USER_ID, fpost.AuthorId)
+	assertEqual(t, MOCK_USER_ID, fpost.Author.Id)
 }
 
 func TestFindPostsByAuthorRepository(t *testing.T) {
 	cleanTables()
-	user1 := model.User{
+	author1 := model.User{
 		Id:    MOCK_USER_ID,
 		Name:  MOCK_USER_NAME,
 		Email: MOCK_USER_EMAIL,
 	}
-	user2 := model.User{
+	author2 := model.User{
 		Id:    MOCK_USER_ID2,
 		Name:  MOCK_USER_NAME2,
 		Email: MOCK_USER_EMAIL2,
@@ -493,7 +497,7 @@ func TestFindPostsByAuthorRepository(t *testing.T) {
 
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author1,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -501,7 +505,7 @@ func TestFindPostsByAuthorRepository(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      &author2,
 		Title:       "Post title 2",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -510,9 +514,9 @@ func TestFindPostsByAuthorRepository(t *testing.T) {
 	ur := repository.NewUserRepositorySql(App.DB)
 	pr := repository.NewPostRepositorySql(App.DB)
 
-	err := ur.Save(&user1)
+	err := ur.Save(&author1)
 	assertNil(t, err)
-	err = ur.Save(&user2)
+	err = ur.Save(&author2)
 	assertNil(t, err)
 	pr.Save(&post1)
 	assertNil(t, err)
@@ -536,9 +540,10 @@ func TestFindPostsByAuthorService(t *testing.T) {
 		Email: MOCK_USER_EMAIL,
 	}
 
+	author := &model.User{Id: MOCK_USER_ID}
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      author,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -546,7 +551,7 @@ func TestFindPostsByAuthorService(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      author,
 		Title:       "Post title 2",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -576,9 +581,10 @@ func TestFindPostsByAuthor(t *testing.T) {
 		Email: MOCK_USER_EMAIL,
 	}
 
+	author := &model.User{Id: MOCK_USER_ID}
 	post1 := model.Post{
 		Id:          MOCK_POST1_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      author,
 		Title:       "Post title 1",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",
@@ -586,7 +592,7 @@ func TestFindPostsByAuthor(t *testing.T) {
 
 	post2 := model.Post{
 		Id:          MOCK_POST2_ID,
-		AuthorId:    MOCK_USER_ID,
+		Author:      author,
 		Title:       "Post title 2",
 		Description: "Post description",
 		ImageUrl:    "/path/to/file",

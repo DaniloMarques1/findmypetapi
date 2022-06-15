@@ -27,6 +27,20 @@ const (
 	MOCK_USER_EMAIL2 = "jon@gmail.com"
 )
 
+type ProducerMock struct {
+}
+
+func (p *ProducerMock) Publish(msg []byte, queueName string) error {
+	log.Printf("Publishing message...\n")
+
+	return nil
+}
+
+func (p *ProducerMock) Setup() error {
+	log.Printf("Setting up producer...\n")
+	return nil
+}
+
 func TestMain(m *testing.M) {
 	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatalf("Error loading env variables %v\n", err)

@@ -43,9 +43,10 @@ func (ps *PostService) CreatePost(postDto dto.CreatePostRequestDto,
 	}
 
 	postId := uuid.NewString()
+	author := &model.User{Id: userId}
 	post := model.Post{
 		Id:          postId,
-		AuthorId:    userId,
+		Author:      author,
 		Title:       postDto.Title,
 		Description: postDto.Description,
 		ImageUrl:    path,
@@ -129,6 +130,7 @@ func (ps *PostService) FindPostsByAuthor(authorId string) (*dto.GetPostsResponse
 }
 
 func (ps *PostService) uploadFile(fileName string, file multipart.File) (string, error) {
+	return "/path/to/file", nil // TODO remove
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {

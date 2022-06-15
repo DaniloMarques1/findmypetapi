@@ -328,8 +328,8 @@ components:
         id:
           type: string
           description: Post unique key
-        author_id:
-          type: string
+        author:
+          $ref: '#/components/schemas/User'
           description: Post author(user) id
         title:
           type: string

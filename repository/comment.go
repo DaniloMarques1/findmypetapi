@@ -30,8 +30,8 @@ func (cr *CommentRepositorySql) Save(comment *model.Comment) error {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(comment.Id, comment.AuthorId,
-		comment.PostId, comment.CommentText).Scan(&comment.CreatedAt)
+	err = stmt.QueryRow(comment.Id, comment.Author.Id,
+		comment.Post.Id, comment.CommentText).Scan(&comment.CreatedAt)
 
 	if err != nil {
 		return err

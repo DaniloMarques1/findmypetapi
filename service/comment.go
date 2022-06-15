@@ -25,10 +25,12 @@ func NewCommentService(commentRepository model.CommentRepository,
 func (cs *CommentService) Save(userId, postId string,
 	request dto.CreateCommentRequestDto) (*dto.CreateCommentResponseDto, error) {
 	commentId := uuid.NewString()
+	post := &model.Post{Id: postId}
+	author := &model.User{Id: userId}
 	comment := model.Comment{
 		Id:          commentId,
-		AuthorId:    userId,
-		PostId:      postId,
+		Author:      author,
+		Post:        post,
 		CommentText: request.CommentText,
 	}
 	err := cs.commentRepository.Save(&comment)
@@ -39,8 +41,6 @@ func (cs *CommentService) Save(userId, postId string,
 		Comment: dto.CommentDto{
 			Id:          comment.Id,
 			CreatedAt:   comment.CreatedAt,
-			AuthorId:    comment.AuthorId,
-			PostId:      comment.PostId,
 			CommentText: comment.CommentText,
 		},
 	}

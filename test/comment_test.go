@@ -1,5 +1,6 @@
 package test
 
+/*
 import (
 	"log"
 	"net/http"
@@ -12,20 +13,6 @@ import (
 	"github.com/danilomarques1/findmypetapi/service"
 	"github.com/danilomarques1/findmypetapi/util"
 )
-
-type ProducerMock struct {
-}
-
-func (p *ProducerMock) Publish(msg []byte, queueName string) error {
-	log.Printf("Publishing message...\n")
-
-	return nil
-}
-
-func (p *ProducerMock) Setup() error {
-	log.Printf("Setting up producer...\n")
-	return nil
-}
 
 func TestSaveCommentRepository(t *testing.T) {
 	cleanTables()
@@ -272,3 +259,4 @@ func TestFindComments(t *testing.T) {
 	response := executeRequest(request)
 	assertEqual(t, http.StatusOK, response.Code)
 }
+*/

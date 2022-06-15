@@ -30,12 +30,19 @@ func (pr *PostRepositorySql) Save(post *model.Post) error {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(post.Id, post.AuthorId, post.Title, post.Description, post.ImageUrl).Scan(
+	err = stmt.QueryRow(post.Id, post.Author.Id, post.Title, post.Description, post.ImageUrl).Scan(
 		&post.Status, &post.CreatedAt)
 	if err != nil {
 		log.Printf("Error executing statement %v\n", err)
 		return err
 	}
+
+	author, err := pr.FindPostAuthor(post.Author.Id)
+	if err != nil {
+		log.Printf("Error finding author %v\n", err)
+		return err
+	}
+	post.Author = author
 
 	return nil
 }
@@ -74,7 +81,7 @@ func (pr *PostRepositorySql) FindById(id string) (*model.Post, error) {
 	defer stmt.Close()
 
 	var post model.Post
-	err = stmt.QueryRow(id).Scan(&post.Id, &post.AuthorId, &post.Title,
+	err = stmt.QueryRow(id).Scan(&post.Id, &post.Author.Id, &post.Title,
 		&post.Description, &post.ImageUrl, &post.Status, &post.CreatedAt)
 	if err != nil {
 		log.Printf("Error querying row %v\n", err)
@@ -97,7 +104,7 @@ func (pr *PostRepositorySql) FindPostByAuthor(authorId, postId string) (*model.P
 	defer stmt.Close()
 
 	var post model.Post
-	err = stmt.QueryRow(authorId, postId).Scan(&post.Id, &post.AuthorId,
+	err = stmt.QueryRow(authorId, postId).Scan(&post.Id, &post.Author.Id,
 		&post.Title, &post.Description, &post.CreatedAt)
 	if err != nil {
 		log.Printf("Error querying post %v\n", err)
@@ -124,10 +131,11 @@ func (pr *PostRepositorySql) FindAll() ([]model.Post, error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var posts []model.Post
 	for rows.Next() {
 		var post model.Post
-		err = rows.Scan(&post.Id, &post.AuthorId, &post.Title, &post.Description,
+		err = rows.Scan(&post.Id, &post.Author.Id, &post.Title, &post.Description,
 			&post.ImageUrl, &post.Status, &post.CreatedAt)
 		if err != nil {
 			log.Printf("Error scanning %v\n", err)
@@ -160,7 +168,7 @@ func (pr *PostRepositorySql) FindPostsByAuthor(authorId string) ([]model.Post, e
 	posts := make([]model.Post, 0)
 	for rows.Next() {
 		var post model.Post
-		err := rows.Scan(&post.Id, &post.AuthorId, &post.Title, &post.Description, &post.ImageUrl,
+		err := rows.Scan(&post.Id, &post.Author.Id, &post.Title, &post.Description, &post.ImageUrl,
 			&post.Status, &post.CreatedAt)
 		if err != nil {
 			return nil, err
@@ -169,4 +177,25 @@ func (pr *PostRepositorySql) FindPostsByAuthor(authorId string) ([]model.Post, e
 	}
 
 	return posts, nil
+}
+
+func (pr *PostRepositorySql) FindPostAuthor(authorId string) (*model.User, error) {
+	stmt, err := pr.db.Prepare(`
+		select id, name, email, password_hash
+		from userpet
+		where id = $1
+	`)
+	if err != nil {
+		log.Printf("Error Preparing statement %v\n", err)
+		return nil, err
+	}
+	defer stmt.Close()
+	var user model.User
+	err = stmt.QueryRow(authorId).Scan(&user.Id, &user.Name, &user.Email, &user.PasswordHash)
+	if err != nil {
+		log.Printf("Error querying user %v\n", err)
+		return nil, err
+	}
+
+	return &user, nil 
 }

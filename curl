@@ -1,0 +1,6 @@
+# Post a user to heroku
+
+curl -X POST -H "Content-Type: application/json" -d '{"name": "Danilo Marques", "email": "danilo@gmail.com", "password": "danilo123", "confirm_password": "danilo123"}' https://findmypetapi.herokuapp.com/user
+
+
+curl -X POST -H "Content-Type: application/json" -d '{"name": "Danilo Marques", "email": "danilo@gmail.com", "password": "danilo123", "confirm_password": "danilo123"}' http://0.0.0.0:8080/user
